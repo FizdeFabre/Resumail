@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import axios from "axios";
 // import { Button } from "@/components/ui/button";
- import { Alert } from "@/src/components/ui/Alert";
+import Alert from "@/components/ui/Alert";
  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useCredits } from "@/pages/CreditContext";
 import { motion } from "framer-motion";
