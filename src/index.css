@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* --- Global / Base --- */
+  --color-background: 0 0% 100%;
+  --color-foreground: 224 71.4% 4.1%;
+
+  /* --- Surfaces --- */
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 224 71.4% 4.1%;
+  --color-popover: 0 0% 100%;
+  --color-popover-foreground: 224 71.4% 4.1%;
+
+  /* --- Brand / Actions --- */
+  --color-primary: 258 90% 66%;
+  --color-primary-foreground: 210 40% 98%;
+  --color-secondary: 220 14% 96%;
+  --color-secondary-foreground: 220 14% 20%;
+
+  /* --- States --- */
+  --color-success: 142 70% 45%;
+  --color-warning: 43 89% 55%;
+  --color-error: 0 84% 60%;
+}
+
+.dark {
+  /* Global dark mode */
+  --color-background: 224 71.4% 4.1%;
+  --color-foreground: 210 40% 98%;
+
+  --color-card: 224 71.4% 7%;
+  --color-card-foreground: 210 40% 98%;
+
+  --color-primary: 258 90% 66%;
+  --color-primary-foreground: 210 40% 98%;
+
+  --color-secondary: 217 19% 27%;
+  --color-secondary-foreground: 210 40% 98%;
+
+  --color-success: 142 70% 45%;
+  --color-warning: 43 89% 55%;
+  --color-error: 0 63% 49%;
+}

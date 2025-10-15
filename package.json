@@ -1,0 +1,48 @@
+{
+  "name": "resumail-frontend",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@supabase/auth-helpers-react": "^0.5.0",
+    "@supabase/supabase-js": "^2.58.0",
+    "axios": "^1.12.2",
+    "chart.js": "^4.5.0",
+    "chartjs-node-canvas": "^5.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cors": "^2.8.5",
+    "curl": "^0.1.4",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "framer-motion": "^12.23.22",
+    "fs": "^0.0.1-security",
+    "googleapis": "^160.0.0",
+    "jspdf": "^3.0.3",
+    "lucide-react": "^0.544.0",
+    "openai": "^5.23.0",
+    "path": "^0.12.7",
+    "pdfkit": "^0.17.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^6.30.1",
+    "recharts": "^3.2.1",
+    "stripe": "^18.5.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.0.0"
+  }
+}
