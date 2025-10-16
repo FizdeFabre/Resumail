@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import axios from "axios";
-// import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useCredits } from "@/pages/CreditContext";
