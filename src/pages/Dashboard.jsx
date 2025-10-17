@@ -25,7 +25,7 @@ import {
 } from "recharts";
 
 const PIE_COLORS = ["#7C3AED", "#F472B6", "#EF4444"]; // violet, rose, red
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://resumail.vercel.app/";
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
