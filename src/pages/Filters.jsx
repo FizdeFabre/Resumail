@@ -9,6 +9,12 @@
     import { Loader2 } from "lucide-react";
     import jsPDF from "jspdf";
 
+  import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
+
+// exemple
+const url = `${API_URL}/emails?user=${encodeURIComponent(user)}&maxResults=500`;
+const resp = await fetch(url);
+
     const CREDITS_PER_EMAIL = 1;
 
     async function getUserId() {
@@ -67,7 +73,7 @@
       async function fetchCreditsFromServer(userId) {
         if (!userId) return 0;
         try {
-          const resp = await fetch(`http://localhost:3000/credits?userId=${encodeURIComponent(userId)}`);
+             const resp = await fetch(`${API_URL}/credits?userId=${encodeURIComponent(userId)}`);
           if (!resp.ok) return 0;
           const json = await resp.json();
           const parsed = parseCreditsJson(json);
@@ -84,7 +90,8 @@
       const downloadReportPdfFile = async (id) => {
         try {
           if (!id) throw new Error("Missing report id");
-          const res = await fetch(`http://localhost:3000/reports/${id}/pdf`);
+        
+          const res = await fetch(`${API_URL}/reports/${id}/pdf`);
           if (!res.ok) throw new Error('PDF download failed');
           const blob = await res.blob();
           const url = window.URL.createObjectURL(blob);
@@ -125,8 +132,8 @@
         setLoading(true);
         setError(null);
         try {
-          const res = await fetch(
-            `http://localhost:3000/emails?user=${encodeURIComponent(gmailUser)}&maxResults=${maxToFetch}`
+                  const res = await fetch(
+            `${API_URL}/emails?user=${encodeURIComponent(gmailUser)}&maxResults=${maxToFetch}`
           );
           if (!res.ok) throw new Error(`Erreur ${res.status}`);
           const data = await res.json();
@@ -202,7 +209,7 @@
       }
 
       // ----- Analyse principale -----
-      const res = await fetch("http://localhost:3000/analyzev2", {
+      const res = await fetch(`${API_URL}/analyzev2`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, emails: selectedEmails }),
@@ -236,7 +243,7 @@
     const fetchMiniReports = async (ids) => {
     if (!ids || !ids.length) return [];
     const query = ids.map(encodeURIComponent).join(',');
-    const res = await fetch(`http://localhost:3000/reports?ids=${query}`);
+     const res = await fetch(`${API_URL}/reports?ids=${query}`);
     if (!res.ok) throw new Error(`Erreur ${res.status} en récupérant les mini-rapports`);
     return await res.json();
   };
