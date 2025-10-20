@@ -11,10 +11,6 @@
 
   import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
 
-// exemple
-const url = `${API_URL}/emails?user=${encodeURIComponent(user)}&maxResults=500`;
-const resp = await fetch(url);
-
     const CREDITS_PER_EMAIL = 1;
 
     async function getUserId() {
@@ -35,7 +31,7 @@ const resp = await fetch(url);
 
       const [emailsOriginal, setEmailsOriginal] = useState([]);
       const [emailsShown, setEmailsShown] = useState([]);
-      
+
       const [selectedMap, setSelectedMap] = useState({});
       // report will contain merged info + id: { total_emails, classification, highlights, summary/report_text, id, finalReportId }
       const [report, setReport] = useState(null);
