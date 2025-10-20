@@ -9,7 +9,7 @@
     import { Loader2 } from "lucide-react";
     import jsPDF from "jspdf";
 
-  import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
+  import { API_URL } from "@/src/lib/api"; // adapte le chemin selon ton projet
 
 // exemple
 const url = `${API_URL}/emails?user=${encodeURIComponent(user)}&maxResults=500`;
