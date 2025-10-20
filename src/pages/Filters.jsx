@@ -35,6 +35,7 @@ const resp = await fetch(url);
 
       const [emailsOriginal, setEmailsOriginal] = useState([]);
       const [emailsShown, setEmailsShown] = useState([]);
+      
       const [selectedMap, setSelectedMap] = useState({});
       // report will contain merged info + id: { total_emails, classification, highlights, summary/report_text, id, finalReportId }
       const [report, setReport] = useState(null);
@@ -127,27 +128,39 @@ const resp = await fetch(url);
       }, [gmailUser, navigate]);
 
       // ------------------- Mailbox -------------------
-      async function fetchMailbox() {
-        if (!gmailUser) return;
-        setLoading(true);
-        setError(null);
-        try {
-                  const res = await fetch(
-            `${API_URL}/emails?user=${encodeURIComponent(gmailUser)}&maxResults=${maxToFetch}`
-          );
-          if (!res.ok) throw new Error(`Erreur ${res.status}`);
-          const data = await res.json();
-          setEmailsOriginal(data.messages || []);
-          setEmailsShown(data.messages || []);
-          setSelectedMap({});
-        } catch (err) {
-          console.error("Fetch emails failed:", err);
-          setError("Impossible de récupérer les emails. Vérifie ton backend !");
-        } finally {
-          setLoading(false);
-        }
-      }
+   async function fetchMailbox() {
+  if (!gmailUser) {
+    console.warn("Aucun utilisateur Gmail défini, impossible de récupérer les emails.");
+    setError("Utilisateur non défini. Connecte-toi d'abord via le Dashboard.");
+    return;
+  }
 
+  setLoading(true);
+  setError(null);
+
+  try {
+    const url = `${API_URL}/emails?user=${encodeURIComponent(gmailUser)}&maxResults=${maxToFetch}`;
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Fetch emails failed:", res.status, text);
+      throw new Error(`Erreur ${res.status} lors de la récupération des emails.`);
+    }
+
+    const data = await res.json();
+    setEmailsOriginal(data.messages || []);
+    setEmailsShown(data.messages || []);
+    setSelectedMap({});
+  } catch (err) {
+    console.error("Fetch emails failed:", err);
+    setError(
+      "Impossible de récupérer les emails. Vérifie ton backend et la connexion de l'utilisateur."
+    );
+  } finally {
+    setLoading(false);
+  }
+}
       // ------------------- Filters -------------------
       const applyFilters = () => {
         const filtered = emailsOriginal.filter((e) => {
