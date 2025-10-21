@@ -218,6 +218,7 @@
       }
 
       // ----- Analyse principale -----
+      console.log("📦 Analyse request:", { userId, emails });
       const res = await fetch(`${API_URL}/analyzev2`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
