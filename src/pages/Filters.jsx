@@ -250,13 +250,15 @@ async function analyzeSelection() {
     }
 
     // ----- Récupération des mini-rapports -----
-    const fetchMiniReports = async (ids) => {
-      if (!ids || !ids.length) return [];
-      const query = ids.map(encodeURIComponent).join(',');
-      const res = await fetch(`${API_URL}/reports?ids=${query}`);
-      if (!res.ok) throw new Error(`Erreur ${res.status} en récupérant les mini-rapports`);
-      return await res.json();
-    };
+   const fetchMiniReports = async (ids) => {
+  console.log("➡️ fetchMiniReports() called with:", ids);
+  if (!ids || !ids.length) return [];
+  const query = ids.map(encodeURIComponent).join(',');
+  console.log("➡️ URL finale:", `${API_URL}/reports?ids=${query}`);
+  const res = await fetch(`${API_URL}/reports?ids=${query}`);
+  if (!res.ok) throw new Error(`Erreur ${res.status} en récupérant les mini-rapports`);
+  return await res.json();
+};
 
     const miniReportsData = await fetchMiniReports(miniReportIds);
 
