@@ -197,97 +197,97 @@
       const deselectAll = () => setSelectedMap({});
 
       // ------------------- Analyze -------------------
-    async function analyzeSelection() {
-    setAnalyzing(true);
-    try {
-      const userId = await getUserId();
-      if (!userId) throw new Error("Utilisateur non connecté (Supabase)");
+async function analyzeSelection() {
+  setAnalyzing(true);
+  try {
+    const userId = await getUserId();
+    if (!userId) throw new Error("Utilisateur non connecté (Supabase)");
 
-      const selectedEmails = emailsShown.filter((e) => selectedMap[e.id]);
-      if (!selectedEmails.length) {
-        alert("Aucun email sélectionné");
-        return;
-      }
-
-      const serverCredits = await fetchCreditsFromServer(userId);
-      const needed = selectedEmails.length * CREDITS_PER_EMAIL;
-      const creditsAvailable = serverCredits ?? creditsLeft ?? 0;
-      if (creditsAvailable < needed) {
-        alert(`Pas assez de crédits (${creditsAvailable} disponibles, ${needed} nécessaires).`);
-        return;
-      }
-
-      // ----- Analyse principale -----
-      console.log("📦 Analyse request:", { userId, emails });
-      const res = await fetch(`${API_URL}/analyzev2`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, emails: selectedEmails }),
-      });
-
-      const ct = (res.headers.get("content-type") || "").toLowerCase();
-      let data;
-      if (ct.includes("application/json")) {
-        data = await res.json();
-      } else {
-        const txt = await res.text();
-        console.error("[analyzeSelection] /analyzev2 returned non-JSON:", txt.slice(0, 400));
-        throw new Error("Le serveur a renvoyé du HTML au lieu du JSON (probablement une erreur backend).");
-      }
-
-      if (!res.ok) throw new Error(data?.error || "Analyse échouée");
-
-      const final = data.finalReport || {};
-      const finalId = data.finalReportId || data.final_report_id || null;
-
-  let miniReportIds = data.miniReportIds || data.mini_report_ids || [];
-  if (typeof miniReportIds === "string") {
-    try {
-      miniReportIds = JSON.parse(miniReportIds);
-    } catch {
-      miniReportIds = [];
+    const selectedEmails = emailsShown.filter((e) => selectedMap[e.id]);
+    if (!selectedEmails.length) {
+      alert("Aucun email sélectionné");
+      return;
     }
-  }
 
-      // ----- Récupération des mini-rapports -----
+    const serverCredits = await fetchCreditsFromServer(userId);
+    const needed = selectedEmails.length * CREDITS_PER_EMAIL;
+    const creditsAvailable = serverCredits ?? creditsLeft ?? 0;
+    if (creditsAvailable < needed) {
+      alert(`Pas assez de crédits (${creditsAvailable} disponibles, ${needed} nécessaires).`);
+      return;
+    }
+
+    // ----- Analyse principale -----
+    console.log("📦 Analyse request:", { userId, emails: selectedEmails }); // ✅ variable correcte
+    const res = await fetch(`${API_URL}/analyzev2`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, emails: selectedEmails }), // ✅ cohérent avec ton backend
+    });
+
+    const ct = (res.headers.get("content-type") || "").toLowerCase();
+    let data;
+    if (ct.includes("application/json")) {
+      data = await res.json();
+    } else {
+      const txt = await res.text();
+      console.error("[analyzeSelection] /analyzev2 returned non-JSON:", txt.slice(0, 400));
+      throw new Error("Le serveur a renvoyé du HTML au lieu du JSON (probablement une erreur backend).");
+    }
+
+    if (!res.ok) throw new Error(data?.error || "Analyse échouée");
+
+    const final = data.finalReport || {};
+    const finalId = data.finalReportId || data.final_report_id || null;
+
+    let miniReportIds = data.miniReportIds || data.mini_report_ids || [];
+    if (typeof miniReportIds === "string") {
+      try {
+        miniReportIds = JSON.parse(miniReportIds);
+      } catch {
+        miniReportIds = [];
+      }
+    }
+
+    // ----- Récupération des mini-rapports -----
     const fetchMiniReports = async (ids) => {
-    if (!ids || !ids.length) return [];
-    const query = ids.map(encodeURIComponent).join(',');
-     const res = await fetch(`${API_URL}/reports?ids=${query}`);
-    if (!res.ok) throw new Error(`Erreur ${res.status} en récupérant les mini-rapports`);
-    return await res.json();
-  };
+      if (!ids || !ids.length) return [];
+      const query = ids.map(encodeURIComponent).join(',');
+      const res = await fetch(`${API_URL}/reports?ids=${query}`);
+      if (!res.ok) throw new Error(`Erreur ${res.status} en récupérant les mini-rapports`);
+      return await res.json();
+    };
 
-      const miniReportsData = await fetchMiniReports(miniReportIds);
+    const miniReportsData = await fetchMiniReports(miniReportIds);
 
-      // ----- Normalisation du rapport final -----
-      const normalized = {
-        id: finalId || final.id || null,
-        finalReportId: finalId || final.id || null,
-        total_emails: final.total_emails ?? final.totalEmails ?? selectedEmails.length,
-        classification: final.classification ?? final.sentiments ?? {},
-        highlights: final.highlights ?? [],
-        summary: final.summary ?? final.report_text ?? "",
-        report_text: final.summary ?? final.report_text ?? "",
-        raw: final,
-        miniReportIds,
-        miniReports: miniReportsData,
-      };
+    // ----- Normalisation du rapport final -----
+    const normalized = {
+      id: finalId || final.id || null,
+      finalReportId: finalId || final.id || null,
+      total_emails: final.total_emails ?? final.totalEmails ?? selectedEmails.length,
+      classification: final.classification ?? final.sentiments ?? {},
+      highlights: final.highlights ?? [],
+      summary: final.summary ?? final.report_text ?? "",
+      report_text: final.summary ?? final.report_text ?? "",
+      raw: final,
+      miniReportIds,
+      miniReports: miniReportsData,
+    };
 
-      setReport(normalized);
+    setReport(normalized);
 
-      // ----- Crédits -----
-      const newCredits = data.creditsLeft ?? parseCreditsJson(data) ?? null;
-      if (newCredits !== null) setCreditsLeft(newCredits);
+    // ----- Crédits -----
+    const newCredits = data.creditsLeft ?? parseCreditsJson(data) ?? null;
+    if (newCredits !== null) setCreditsLeft(newCredits);
 
-      setSelectedMap({});
-    } catch (err) {
-      console.error("Analyse error:", err);
-      alert(err.message || "Erreur pendant l’analyse (voir console)");
-    } finally {
-      setAnalyzing(false);
-    }
+    setSelectedMap({});
+  } catch (err) {
+    console.error("Analyse error:", err);
+    alert(err.message || "Erreur pendant l’analyse (voir console)");
+  } finally {
+    setAnalyzing(false);
   }
+}
 
       // ------------------- Print (styled HTML "mignon") -------------------
       const handlePrintReport = () => {
