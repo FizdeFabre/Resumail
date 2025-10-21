@@ -419,24 +419,22 @@ app.get("/auth/callback", async (req, res) => {
     if (!code) return res.status(400).send("Missing code");
 
     const { tokens } = await oauth2Client.getToken(code);
-    // store tokens in memory client for subsequent Gmail calls
     oauth2Client.setCredentials(tokens);
 
     const email = await getUserEmailFromTokens(tokens);
     if (!email) return res.status(500).send("Could not determine Gmail address");
 
-    // persist tokens to tokens.json
     const tokensStore = readTokensFile();
     tokensStore[email] = tokens;
     writeTokensFile(tokensStore);
 
-    // redirect to frontend filters page (so frontend picks user from URL)
-    const frontUrl = `${FRONTEND_URL}/filters?user=${encodeURIComponent(email)}`;
-    console.log("OAuth callback, redirect to:", frontUrl);
-    res.redirect(frontUrl);
+    // ✅ Redirige proprement vers le frontend
+    const redirectUrl = `${FRONTEND_URL}/filters?user=${encodeURIComponent(email)}`;
+    console.log("✅ OAuth success, redirecting to:", redirectUrl);
+    return res.redirect(302, redirectUrl);
   } catch (err) {
-    console.error("Callback error:", err);
-    res.status(500).send("Auth callback error");
+    console.error("❌ OAuth callback error:", err);
+    return res.status(500).send("Auth callback error");
   }
 });
 

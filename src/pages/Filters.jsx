@@ -31,7 +31,7 @@
 
       const [emailsOriginal, setEmailsOriginal] = useState([]);
       const [emailsShown, setEmailsShown] = useState([]);
-
+      
       const [selectedMap, setSelectedMap] = useState({});
       // report will contain merged info + id: { total_emails, classification, highlights, summary/report_text, id, finalReportId }
       const [report, setReport] = useState(null);
