@@ -255,7 +255,7 @@ async function analyzeSelection() {
   if (!ids || !ids.length) return [];
   const query = ids.map(encodeURIComponent).join(',');
   console.log("➡️ URL finale:", `${API_URL}/reports?ids=${query}`);
-  const res = await fetch(`${API_URL}/reports?ids=${query}`);
+const res = await fetch(`${API_URL}/reports/byIds?ids=${query}`);
   if (!res.ok) throw new Error(`Erreur ${res.status} en récupérant les mini-rapports`);
   return await res.json();
 };
