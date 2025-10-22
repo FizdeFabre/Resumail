@@ -255,7 +255,7 @@ async function analyzeSelection() {
   if (!ids || !ids.length) return [];
   const query = ids.map(encodeURIComponent).join(',');
   console.log("➡️ URL finale:", `${API_URL}/reports?ids=${query}`);
-const res = await fetch(`${API_URL}/reports/byIds?ids=${query}`);
+  const res = await fetch(`${API_URL}/reports/byIds?ids=${query}`); 
   if (!res.ok) throw new Error(`Erreur ${res.status} en récupérant les mini-rapports`);
   return await res.json();
 };
@@ -529,19 +529,45 @@ const res = await fetch(`${API_URL}/reports/byIds?ids=${query}`);
       setTimeout(() => w.print(), 400);
     };
 
-    const handleDownloadStyledPdf = async () => {
-      const html = generateStyledHtml();
-      const doc = new jsPDF("p", "pt", "a4");
-      await doc.html(`<style>${styledCss}</style>${html}`, {
-        callback: (doc) => {
-          doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
-        },
-        x: 20,
-        y: 20,
-        width: 550,
-        windowWidth: 800,
-      });
-    };
+const handleDownloadStyledPdf = async () => {
+  try {
+    if (!report) {
+      alert("Aucun rapport à exporter !");
+      return;
+    }
+
+    const html = generateStyledHtml();
+    if (!html.trim()) {
+      alert("Erreur : contenu vide !");
+      return;
+    }
+
+    console.log("🧾 Export PDF: génération HTML OK, longueur =", html.length);
+    const doc = new jsPDF("p", "pt", "a4");
+
+    // petit délai pour laisser le navigateur rendre le HTML
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    await doc.html(`<style>${styledCss}</style>${html}`, {
+      callback: (doc) => {
+        console.log("✅ PDF généré avec succès !");
+        doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
+      },
+      x: 20,
+      y: 20,
+      width: 550,
+      windowWidth: 800,
+      html2canvas: {
+        useCORS: true, // autorise les images externes si besoin
+        scale: 0.8,    // réduit les erreurs mémoire sur Vercel
+        logging: true, // affiche ce que fait html2canvas
+      },
+    });
+  } catch (err) {
+    console.error("🚨 Erreur PDF:", err);
+    alert("Erreur lors de la génération du PDF (voir console).");
+  }
+};
 
       // ------------------- Render -------------------
 return (
