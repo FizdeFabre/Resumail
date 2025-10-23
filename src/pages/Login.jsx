@@ -1,87 +1,65 @@
+//Login.jsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { supabase } from "../supabaseClient";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  async function handleLogin(e) {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      navigate("/dashboard");
-    } catch (err) {
-      alert(err.message || "Erreur de connexion");
-    } finally {
-      setLoading(false);
-    }
+async function handleLogin(e) {
+  e.preventDefault();
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
   }
 
+  const user = data.user;
+
+  if (user) {
+    // Vérifie ou crée profil
+    await supabase.from("profiles").upsert({
+      id: user.id,
+      email: user.email,
+    });
+  }
+
+  navigate("/dashboard");
+}
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-indigo-100 p-4">
-      <Card className="w-full max-w-sm shadow-xl border border-gray-100">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-800">Connexion</CardTitle>
-          <CardDescription className="text-gray-500">
-            Accède à ton espace Resumail
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="toi@exemple.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <span className="flex items-center gap-2 justify-center">
-                  <Loader2 className="animate-spin w-4 h-4" /> Connexion...
-                </span>
-              ) : (
-                "Se connecter"
-              )}
-            </Button>
-          </form>
-        </CardContent>
-
-        <CardFooter className="text-center text-sm text-gray-500">
-          Pas encore de compte ?{" "}
-          <Link to="/signup" className="text-indigo-600 hover:underline">
-            Inscription
-          </Link>
-        </CardFooter>
-      </Card>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <form onSubmit={handleLogin} className="bg-white p-6 rounded-xl shadow-md w-80">
+        <h2 className="text-xl font-bold mb-4">Connexion</h2>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full border p-2 mb-3 rounded"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Mot de passe"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full border p-2 mb-3 rounded"
+          required
+        />
+        <button type="submit" className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">
+          Se connecter
+        </button>
+        <p className="mt-4 text-sm text-center">
+          Pas encore de compte ? <Link to="/signup" className="text-indigo-600">Inscription</Link>
+        </p>
+      </form>
     </div>
   );
 }
