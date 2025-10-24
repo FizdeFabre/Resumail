@@ -590,7 +590,7 @@ const handleDownloadStyledPdf = async () => {
     alert("Erreur lors de la génération du PDF. Consulte la console !");
   }
 };
-
+    
       // ------------------- Render -------------------
 return (
   <div className="p-8 max-w-6xl mx-auto font-sans space-y-8">
