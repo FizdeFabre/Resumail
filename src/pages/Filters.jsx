@@ -529,59 +529,83 @@ async function analyzeSelection() {
       setTimeout(() => w.print(), 400);
     };
 
-const handleDownloadStyledPdf = async () => {
+const handleDownloadStyledPdf = () => {
   try {
     if (!report) {
       alert("Aucun rapport à exporter !");
       return;
     }
 
-    const html = generateStyledHtml();
-    if (!html.trim()) {
-      alert("Erreur : contenu vide !");
-      return;
+    const doc = new jsPDF({
+      orientation: "p",
+      unit: "pt",
+      format: "a4",
+    });
+
+    const margin = 40;
+    const lineHeight = 18;
+    const maxWidth = 520;
+    let y = margin;
+
+    // 🧾 Titre
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Rapport Resumail", margin, y);
+    y += lineHeight * 2;
+
+    // 📨 Informations de base
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`Adresse Gmail : ${report?.email || "inconnue"}`, margin, y);
+    y += lineHeight;
+    doc.text(`Date : ${new Date().toLocaleString("fr-FR")}`, margin, y);
+    y += lineHeight * 2;
+
+    // 🧠 Résumé principal
+    doc.setFont("helvetica", "bold");
+    doc.text("Résumé général :", margin, y);
+    y += lineHeight;
+    doc.setFont("helvetica", "normal");
+    const summary = doc.splitTextToSize(report.summary || "Aucun résumé.", maxWidth);
+    doc.text(summary, margin, y);
+    y += summary.length * lineHeight + lineHeight;
+
+    // 📊 Sentiments / classification
+    if (report.classification) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Analyse des sentiments :", margin, y);
+      y += lineHeight;
+
+      doc.setFont("helvetica", "normal");
+      Object.entries(report.classification).forEach(([key, value]) => {
+        doc.text(`• ${key}: ${value}`, margin + 15, y);
+        y += lineHeight;
+      });
+      y += lineHeight;
     }
 
-    // Crée un conteneur propre
-    const container = document.createElement("div");
-    container.innerHTML = html;
-    container.style.fontFamily = "'Inter', sans-serif";
-    container.style.margin = "0 auto";
-    container.style.width = "700px";
-    container.style.padding = "20px";
-    container.style.backgroundColor = "#fff";
-    document.body.appendChild(container);
+    // 💬 Highlights
+    if (report.highlights && report.highlights.length > 0) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Points clés :", margin, y);
+      y += lineHeight;
 
-    // Injecte les styles globaux
-    const style = document.createElement("style");
-    style.textContent = `
-      body { font-family: 'Inter', sans-serif; color: #222; }
-      h1, h2, h3 { color: #4c1d95; margin-bottom: 8px; }
-      p { line-height: 1.5; font-size: 13px; }
-      .section { margin-bottom: 16px; }
-    `;
-    document.head.appendChild(style);
+      doc.setFont("helvetica", "normal");
+      report.highlights.forEach((h, i) => {
+        const txt = doc.splitTextToSize(`${i + 1}. ${h}`, maxWidth);
+        doc.text(txt, margin + 15, y);
+        y += txt.length * lineHeight;
+      });
+      y += lineHeight;
+    }
 
-    const doc = new jsPDF("p", "pt", "a4", true);
-    await new Promise((r) => setTimeout(r, 200));
+    // 🧾 ID du rapport
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(`Rapport ID: ${report.id || "N/A"}`, margin, 800);
 
-    await doc.html(container, {
-      callback: (doc) => {
-        doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
-        container.remove();
-        style.remove();
-      },
-      x: 40,
-      y: 40,
-      width: 520, // largeur plus réduite = contenu centré
-      windowWidth: 800,
-      html2canvas: {
-        useCORS: true,
-        scale: 1.2,
-        logging: false,
-        backgroundColor: "#ffffff",
-      },
-    });
+    // ✅ Export final
+    doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
   } catch (err) {
     console.error("🚨 Erreur PDF:", err);
     alert("Erreur lors de la génération du PDF (voir console).");
