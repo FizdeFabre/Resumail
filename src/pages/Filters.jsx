@@ -531,41 +531,41 @@ async function analyzeSelection() {
 
 const handleDownloadStyledPdf = async () => {
   try {
-    if (!report) {
-      alert("Aucun rapport à exporter !");
-      return;
-    }
-
+    if (!report) return alert("Aucun rapport à exporter !");
     const html = generateStyledHtml();
-    if (!html.trim()) {
-      alert("Erreur : contenu vide !");
-      return;
-    }
 
-    console.log("🧾 Export PDF: génération HTML OK, longueur =", html.length);
+    // Crée un conteneur isolé dans le DOM pour capturer le rendu réel
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    document.body.appendChild(container);
+
+    // Style global (tailwind simplifié)
+    const globalStyle = document.createElement("style");
+    globalStyle.textContent = styledCss;
+    document.head.appendChild(globalStyle);
+
     const doc = new jsPDF("p", "pt", "a4");
+    await new Promise((r) => setTimeout(r, 300));
 
-    // petit délai pour laisser le navigateur rendre le HTML
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    await doc.html(`<style>${styledCss}</style>${html}`, {
+    await doc.html(container, {
       callback: (doc) => {
-        console.log("✅ PDF généré avec succès !");
         doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
+        container.remove();
+        globalStyle.remove();
       },
       x: 20,
       y: 20,
       width: 550,
-      windowWidth: 800,
+      windowWidth: 900,
       html2canvas: {
-        useCORS: true, // autorise les images externes si besoin
-        scale: 0.8,    // réduit les erreurs mémoire sur Vercel
-        logging: true, // affiche ce que fait html2canvas
+        useCORS: true,
+        scale: 1,
+        backgroundColor: "#ffffff",
       },
     });
   } catch (err) {
     console.error("🚨 Erreur PDF:", err);
-    alert("Erreur lors de la génération du PDF (voir console).");
+    alert("Erreur pendant la génération du PDF (voir console).");
   }
 };
 
