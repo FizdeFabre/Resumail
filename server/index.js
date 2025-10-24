@@ -25,6 +25,7 @@ import Stripe from "stripe";
 import bodyParser from "body-parser";
 import { supabase } from "./supabaseClient.js";
 import reportsRouter from "./routes/reports.js";
+import html2pdf from "html2pdf.js";
 
 dotenv.config();
 
