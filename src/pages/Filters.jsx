@@ -7,7 +7,7 @@
     import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
     import { supabase } from "../supabaseClient";
     import { Loader2 } from "lucide-react";
-    import { jsPDF } from "jspdf";
+    import jsPDF from "jspdf";
 
   import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
 
@@ -537,36 +537,57 @@ const handleDownloadStyledPdf = async () => {
     }
 
     const html = generateStyledHtml();
+    if (!html.trim()) {
+      alert("Erreur : contenu vide !");
+      return;
+    }
 
-    // 🧃 On crée un conteneur temporaire caché
+    // ✅ Création d’un container temporaire isolé
     const container = document.createElement("div");
-    container.innerHTML = `
-      <html>
-        <head><style>${styledCss}</style></head>
-        <body>${html}</body>
-      </html>`;
-    container.style.position = "fixed";
-    container.style.top = "-9999px";
+    container.innerHTML = html;
+    container.style.cssText = `
+      font-family: 'Inter', sans-serif;
+      width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+      background: white;
+      color: #111;
+    `;
     document.body.appendChild(container);
 
-    // 🪄 On lance html2pdf
-    const opt = {
-      margin: 0.5,
-      filename: `Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
+    // ✅ Style global injecté pour cohérence
+    const style = document.createElement("style");
+    style.textContent = styledCss;
+    document.head.appendChild(style);
+
+    // ✅ Génération du PDF
+    const pdf = new jsPDF({
+      orientation: "p",
+      unit: "pt",
+      format: "a4",
+      compress: true,
+    });
+
+    await new Promise((r) => setTimeout(r, 300)); // laisse le DOM se poser
+
+    await pdf.html(container, {
+      x: 40,
+      y: 40,
+      width: 520, // centré proprement
       html2canvas: {
-        scale: 2, // plus = meilleure qualité
-        useCORS: true, // utile si images externes
+        scale: 1.3, // meilleure résolution
+        useCORS: true,
+        backgroundColor: "#fff",
       },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    };
-
-    await html2pdf().from(container).set(opt).save();
-
-    document.body.removeChild(container);
+      callback: (doc) => {
+        doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
+        container.remove();
+        style.remove();
+      },
+    });
   } catch (err) {
     console.error("🚨 Erreur PDF:", err);
-    alert("Erreur lors de la génération du PDF (voir console).");
+    alert("Erreur lors de la génération du PDF. Consulte la console !");
   }
 };
 
@@ -634,7 +655,7 @@ return (
 
         {/* Mots-clés */}
         <div>
-          <h2 className="text-lg font-semibold text-violet-600 mb-2">Filtrage par mots-clés</h2>
+          <h2 className="text-lg font-semibold text-pink-600 mb-2">Filtrage par mots-clés</h2>
           <p className="text-sm text-gray-500 mb-2">Mots-clés à ignorer dans le contenu ou le sujet.</p>
           <Input
             placeholder="Ex: promo, urgent, vente..."
@@ -663,7 +684,7 @@ return (
 
         {/* Taille */}
         <div>
-          <h2 className="text-lg font-semibold text-violet-600 mb-2">Taille du message</h2>
+          <h2 className="text-lg font-semibold text-pink-600 mb-2">Taille du message</h2>
           <p className="text-sm text-gray-500 mb-2">Filtrer selon le nombre de mots du contenu.</p>
           <div className="flex gap-2">
             <Input
@@ -692,7 +713,7 @@ return (
         <Button
           variant="secondary"
           onClick={clearAllFiltersInputs}
-          className="bg-pink-100 text-violet-700 hover:bg-pink-200"
+          className="bg-pink-100 text-pink-700 hover:bg-pink-200"
         >
           Vider
         </Button>
