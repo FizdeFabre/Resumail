@@ -8,6 +8,7 @@
     import { supabase } from "../supabaseClient";
     import { Loader2 } from "lucide-react";
     import jsPDF from "jspdf";
+    import { jsPDF } from "jspdf";
 
   import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
 
@@ -531,41 +532,60 @@ async function analyzeSelection() {
 
 const handleDownloadStyledPdf = async () => {
   try {
-    if (!report) return alert("Aucun rapport à exporter !");
-    const html = generateStyledHtml();
+    if (!report) {
+      alert("Aucun rapport à exporter !");
+      return;
+    }
 
-    // Crée un conteneur isolé dans le DOM pour capturer le rendu réel
+    const html = generateStyledHtml();
+    if (!html.trim()) {
+      alert("Erreur : contenu vide !");
+      return;
+    }
+
+    // Crée un conteneur propre
     const container = document.createElement("div");
     container.innerHTML = html;
+    container.style.fontFamily = "'Inter', sans-serif";
+    container.style.margin = "0 auto";
+    container.style.width = "700px";
+    container.style.padding = "20px";
+    container.style.backgroundColor = "#fff";
     document.body.appendChild(container);
 
-    // Style global (tailwind simplifié)
-    const globalStyle = document.createElement("style");
-    globalStyle.textContent = styledCss;
-    document.head.appendChild(globalStyle);
+    // Injecte les styles globaux
+    const style = document.createElement("style");
+    style.textContent = `
+      body { font-family: 'Inter', sans-serif; color: #222; }
+      h1, h2, h3 { color: #4c1d95; margin-bottom: 8px; }
+      p { line-height: 1.5; font-size: 13px; }
+      .section { margin-bottom: 16px; }
+    `;
+    document.head.appendChild(style);
 
-    const doc = new jsPDF("p", "pt", "a4");
-    await new Promise((r) => setTimeout(r, 300));
+    const doc = new jsPDF("p", "pt", "a4", true);
+    await new Promise((r) => setTimeout(r, 200));
 
     await doc.html(container, {
       callback: (doc) => {
         doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
         container.remove();
-        globalStyle.remove();
+        style.remove();
       },
-      x: 20,
-      y: 20,
-      width: 550,
-      windowWidth: 900,
+      x: 40,
+      y: 40,
+      width: 520, // largeur plus réduite = contenu centré
+      windowWidth: 800,
       html2canvas: {
         useCORS: true,
-        scale: 1,
+        scale: 1.2,
+        logging: false,
         backgroundColor: "#ffffff",
       },
     });
   } catch (err) {
     console.error("🚨 Erreur PDF:", err);
-    alert("Erreur pendant la génération du PDF (voir console).");
+    alert("Erreur lors de la génération du PDF (voir console).");
   }
 };
 
