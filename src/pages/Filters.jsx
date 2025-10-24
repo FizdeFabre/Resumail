@@ -7,7 +7,6 @@
     import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
     import { supabase } from "../supabaseClient";
     import { Loader2 } from "lucide-react";
-    import jsPDF from "jspdf";
     import { jsPDF } from "jspdf";
 
   import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
