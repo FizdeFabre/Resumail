@@ -529,83 +529,41 @@ async function analyzeSelection() {
       setTimeout(() => w.print(), 400);
     };
 
-const handleDownloadStyledPdf = () => {
+const handleDownloadStyledPdf = async () => {
   try {
     if (!report) {
       alert("Aucun rapport à exporter !");
       return;
     }
 
-    const doc = new jsPDF({
-      orientation: "p",
-      unit: "pt",
-      format: "a4",
-    });
+    const html = generateStyledHtml();
 
-    const margin = 40;
-    const lineHeight = 18;
-    const maxWidth = 520;
-    let y = margin;
+    // 🧃 On crée un conteneur temporaire caché
+    const container = document.createElement("div");
+    container.innerHTML = `
+      <html>
+        <head><style>${styledCss}</style></head>
+        <body>${html}</body>
+      </html>`;
+    container.style.position = "fixed";
+    container.style.top = "-9999px";
+    document.body.appendChild(container);
 
-    // 🧾 Titre
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Rapport Resumail", margin, y);
-    y += lineHeight * 2;
+    // 🪄 On lance html2pdf
+    const opt = {
+      margin: 0.5,
+      filename: `Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2, // plus = meilleure qualité
+        useCORS: true, // utile si images externes
+      },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    };
 
-    // 📨 Informations de base
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-    doc.text(`Adresse Gmail : ${report?.email || "inconnue"}`, margin, y);
-    y += lineHeight;
-    doc.text(`Date : ${new Date().toLocaleString("fr-FR")}`, margin, y);
-    y += lineHeight * 2;
+    await html2pdf().from(container).set(opt).save();
 
-    // 🧠 Résumé principal
-    doc.setFont("helvetica", "bold");
-    doc.text("Résumé général :", margin, y);
-    y += lineHeight;
-    doc.setFont("helvetica", "normal");
-    const summary = doc.splitTextToSize(report.summary || "Aucun résumé.", maxWidth);
-    doc.text(summary, margin, y);
-    y += summary.length * lineHeight + lineHeight;
-
-    // 📊 Sentiments / classification
-    if (report.classification) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Analyse des sentiments :", margin, y);
-      y += lineHeight;
-
-      doc.setFont("helvetica", "normal");
-      Object.entries(report.classification).forEach(([key, value]) => {
-        doc.text(`• ${key}: ${value}`, margin + 15, y);
-        y += lineHeight;
-      });
-      y += lineHeight;
-    }
-
-    // 💬 Highlights
-    if (report.highlights && report.highlights.length > 0) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Points clés :", margin, y);
-      y += lineHeight;
-
-      doc.setFont("helvetica", "normal");
-      report.highlights.forEach((h, i) => {
-        const txt = doc.splitTextToSize(`${i + 1}. ${h}`, maxWidth);
-        doc.text(txt, margin + 15, y);
-        y += txt.length * lineHeight;
-      });
-      y += lineHeight;
-    }
-
-    // 🧾 ID du rapport
-    doc.setFontSize(9);
-    doc.setTextColor(120);
-    doc.text(`Rapport ID: ${report.id || "N/A"}`, margin, 800);
-
-    // ✅ Export final
-    doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
+    document.body.removeChild(container);
   } catch (err) {
     console.error("🚨 Erreur PDF:", err);
     alert("Erreur lors de la génération du PDF (voir console).");
