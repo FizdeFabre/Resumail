@@ -7,7 +7,8 @@
     import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
     import { supabase } from "../supabaseClient";
     import { Loader2 } from "lucide-react";
-    import jsPDF from "jspdf";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
   import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
 
@@ -536,61 +537,75 @@ const handleDownloadStyledPdf = async () => {
       return;
     }
 
+    // 🧩 1. On génère le HTML complet
     const html = generateStyledHtml();
-    if (!html.trim()) {
-      alert("Erreur : contenu vide !");
-      return;
-    }
 
-    // ✅ Création d’un container temporaire isolé
+    // 🧩 2. On crée un conteneur caché dans le DOM
     const container = document.createElement("div");
-    container.innerHTML = html;
-    container.style.cssText = `
-      font-family: 'Inter', sans-serif;
-      width: 700px;
-      margin: 0 auto;
-      padding: 20px;
-      background: white;
-      color: #111;
+    container.innerHTML = `
+      <div id="pdf-content" style="
+        background: white;
+        width: 794px; /* correspond à A4 */
+        padding: 40px;
+        color: #111;
+        font-family: 'Inter', sans-serif;
+      ">
+        <style>${styledCss}</style>
+        ${html}
+      </div>
     `;
+    container.style.position = "fixed";
+    container.style.top = "-9999px";
     document.body.appendChild(container);
 
-    // ✅ Style global injecté pour cohérence
-    const style = document.createElement("style");
-    style.textContent = styledCss;
-    document.head.appendChild(style);
+    // 🧩 3. Capture haute résolution avec html2canvas
+    const pdfContent = container.querySelector("#pdf-content");
+    const canvas = await html2canvas(pdfContent, {
+      scale: 2.5, // augmente la qualité
+      useCORS: true,
+      backgroundColor: "#fff",
+      logging: false,
+    });
 
-    // ✅ Génération du PDF
+    const imgData = canvas.toDataURL("image/png");
+
+    // 🧩 4. Création du PDF jsPDF
     const pdf = new jsPDF({
       orientation: "p",
       unit: "pt",
       format: "a4",
-      compress: true,
     });
 
-    await new Promise((r) => setTimeout(r, 300)); // laisse le DOM se poser
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    await pdf.html(container, {
-      x: 40,
-      y: 40,
-      width: 520, // centré proprement
-      html2canvas: {
-        scale: 1.3, // meilleure résolution
-        useCORS: true,
-        backgroundColor: "#fff",
-      },
-      callback: (doc) => {
-        doc.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
-        container.remove();
-        style.remove();
-      },
-    });
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // 🧩 5. Ajout de pages si nécessaire
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    // 🧩 6. Sauvegarde
+    pdf.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
+
+    // Nettoyage
+    document.body.removeChild(container);
   } catch (err) {
     console.error("🚨 Erreur PDF:", err);
-    alert("Erreur lors de la génération du PDF. Consulte la console !");
+    alert("Erreur lors de la génération du PDF (voir console).");
   }
 };
-    
+
       // ------------------- Render -------------------
 return (
   <div className="p-8 max-w-6xl mx-auto font-sans space-y-8">
