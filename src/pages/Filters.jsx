@@ -634,7 +634,7 @@ return (
 
         {/* Mots-clés */}
         <div>
-          <h2 className="text-lg font-semibold text-pink-600 mb-2">Filtrage par mots-clés</h2>
+          <h2 className="text-lg font-semibold text-violet-600 mb-2">Filtrage par mots-clés</h2>
           <p className="text-sm text-gray-500 mb-2">Mots-clés à ignorer dans le contenu ou le sujet.</p>
           <Input
             placeholder="Ex: promo, urgent, vente..."
@@ -663,7 +663,7 @@ return (
 
         {/* Taille */}
         <div>
-          <h2 className="text-lg font-semibold text-pink-600 mb-2">Taille du message</h2>
+          <h2 className="text-lg font-semibold text-violet-600 mb-2">Taille du message</h2>
           <p className="text-sm text-gray-500 mb-2">Filtrer selon le nombre de mots du contenu.</p>
           <div className="flex gap-2">
             <Input
@@ -692,7 +692,7 @@ return (
         <Button
           variant="secondary"
           onClick={clearAllFiltersInputs}
-          className="bg-pink-100 text-pink-700 hover:bg-pink-200"
+          className="bg-pink-100 text-violet-700 hover:bg-pink-200"
         >
           Vider
         </Button>
