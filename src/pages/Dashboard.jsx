@@ -9,6 +9,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
 import { useCredits } from "@/pages/CreditContext";
 import { motion } from "framer-motion";
 import { Zap, Rocket } from "lucide-react";
+import { exportStyledPdf } from "../utils/pdfManager"; 
 
 import {
   PieChart,
