@@ -213,15 +213,11 @@ function buildLineData(reports) {
 const downloadReportPdf = async (report) => {
   try {
     if (!report) return alert("Aucun rapport à exporter !");
-    await exportStyledPdf(report, () => generateStyledHtml(report), styledCss, `Rapport_${report.id}`);
+  await exportStyledPdf(report, user?.email, styledCss, `Rapport_${report.id}`);
   } catch (e) {
     console.error("downloadReportPdf error:", e);
     alert("Erreur lors de la génération du PDF (voir console).");
   }
-};
-
-const downloadReportPdf = async (report) => {
-  await exportStyledPdf(report, user?.email, styledCss, `Rapport_${report.id}`);
 };
 
   // small derived data for charts
