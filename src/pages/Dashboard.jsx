@@ -354,6 +354,7 @@ const downloadReportPdf = async (report) => {
                             <Button size="sm" variant="outline" className="text-violet-600 border-violet-200 hover:bg-violet-50" onClick={() => downloadReportPdf(r.id)}>
                               Télécharger PDF
                             </Button>
+                            
                           </td>
                         </tr>
                       ))}
