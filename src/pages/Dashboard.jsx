@@ -212,11 +212,29 @@ function buildLineData(reports) {
 
 const downloadReportPdf = async (report) => {
   try {
-    if (!report) return alert("Aucun rapport à exporter !");
-  await exportStyledPdf(report, user?.email, styledCss, `Rapport_${report.id}`);
-  } catch (e) {
-    console.error("downloadReportPdf error:", e);
-    alert("Erreur lors de la génération du PDF (voir console).");
+    // 1️⃣ On récupère le rapport complet depuis Supabase
+    const { data: fullReport, error } = await supabase
+      .from("reports")
+      .select("*")
+      .eq("id", report.id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    // 2️⃣ On merge les données (au cas où certaines viendraient du dashboard)
+    const mergedReport = {
+      ...report,
+      ...fullReport,
+      highlights: fullReport?.highlights ?? report.highlights ?? [],
+      mini_reports: fullReport?.mini_reports ?? report.mini_reports ?? [],
+      classification: fullReport?.classification ?? report.classification ?? {},
+    };
+
+    // 3️⃣ On exporte avec les données fraîches
+    await exportStyledPdf(mergedReport, user?.email);
+  } catch (err) {
+    console.error("Erreur lors du téléchargement du rapport complet :", err);
+    alert("Impossible de charger les données complètes du rapport avant export.");
   }
 };
 
