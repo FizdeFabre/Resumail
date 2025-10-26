@@ -532,7 +532,79 @@ async function analyzeSelection() {
     };
 
 const handleDownloadStyledPdf = async () => {
-  await exportStyledPdf(report, generateStyledHtml, styledCss, "Resumail_Rapport");
+  try {
+    if (!report) {
+      alert("Aucun rapport à exporter !");
+      return;
+    }
+
+    // 🧩 1. On génère le HTML complet
+    const html = generateStyledHtml();
+
+    // 🧩 2. On crée un conteneur caché dans le DOM
+    const container = document.createElement("div");
+    container.innerHTML = `
+      <div id="pdf-content" style="
+        background: white;
+        width: 794px; /* correspond à A4 */
+        padding: 40px;
+        color: #111;
+        font-family: 'Inter', sans-serif;
+      ">
+        <style>${styledCss}</style>
+        ${html}
+      </div>
+    `;
+    container.style.position = "fixed";
+    container.style.top = "-9999px";
+    document.body.appendChild(container);
+
+    // 🧩 3. Capture haute résolution avec html2canvas
+    const pdfContent = container.querySelector("#pdf-content");
+    const canvas = await html2canvas(pdfContent, {
+      scale: 2.5, // augmente la qualité
+      useCORS: true,
+      backgroundColor: "#fff",
+      logging: false,
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    // 🧩 4. Création du PDF jsPDF
+    const pdf = new jsPDF({
+      orientation: "p",
+      unit: "pt",
+      format: "a4",
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // 🧩 5. Ajout de pages si nécessaire
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    // 🧩 6. Sauvegarde
+    pdf.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
+
+    // Nettoyage
+    document.body.removeChild(container);
+  } catch (err) {
+    console.error("🚨 Erreur PDF:", err);
+    alert("Erreur lors de la génération du PDF (voir console).");
+  }
 };
 
       // ------------------- Render -------------------

@@ -1,33 +1,21 @@
-// src/utils/pdfManager.js
-import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { generateStyledHtml, styledCss } from "./reportTemplate.js";
 
-/**
- * Exporte un rapport Resumail en PDF stylé.
- * @param {Object} report - Données du rapport à exporter
- * @param {Function} generateStyledHtml - Fonction qui génère le HTML complet (retourne une string)
- * @param {String} styledCss - Chaîne de style CSS utilisée pour le rendu
- * @param {String} filename - Nom du fichier PDF (sans extension)
- */
-export async function exportStyledPdf(report, generateStyledHtml, styledCss, filename = "Resumail_Rapport") {
+export async function exportStyledPdf(report, gmailUser = "—") {
+  if (!report) {
+    alert("Aucun rapport à exporter !");
+    return;
+  }
+
   try {
-    if (!report) {
-      alert("Aucun rapport à exporter !");
-      return;
-    }
+    const html = generateStyledHtml(report, gmailUser);
 
-    // 🧩 1. Génération du HTML complet
-    const html = generateStyledHtml();
-    if (!html || !html.trim()) {
-      throw new Error("HTML vide pour le PDF");
-    }
-
-    // 🧩 2. Conteneur temporaire invisible
     const container = document.createElement("div");
     container.innerHTML = `
       <div id="pdf-content" style="
         background: white;
-        width: 794px;
+        width: 794px; /* format A4 */
         padding: 40px;
         color: #111;
         font-family: 'Inter', sans-serif;
@@ -41,8 +29,6 @@ export async function exportStyledPdf(report, generateStyledHtml, styledCss, fil
     document.body.appendChild(container);
 
     const pdfContent = container.querySelector("#pdf-content");
-
-    // 🧩 3. Capture haute résolution
     const canvas = await html2canvas(pdfContent, {
       scale: 2.5,
       useCORS: true,
@@ -51,13 +37,7 @@ export async function exportStyledPdf(report, generateStyledHtml, styledCss, fil
     });
 
     const imgData = canvas.toDataURL("image/png");
-
-    // 🧩 4. Génération PDF jsPDF
-    const pdf = new jsPDF({
-      orientation: "p",
-      unit: "pt",
-      format: "a4",
-    });
+    const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -77,9 +57,7 @@ export async function exportStyledPdf(report, generateStyledHtml, styledCss, fil
       heightLeft -= pageHeight;
     }
 
-    pdf.save(`${filename}_${new Date().toISOString().split("T")[0]}.pdf`);
-
-    // Nettoyage
+    pdf.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
     document.body.removeChild(container);
   } catch (err) {
     console.error("🚨 Erreur PDF:", err);
