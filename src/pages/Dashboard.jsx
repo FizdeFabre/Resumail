@@ -1,14 +1,16 @@
+// src/pages/Dashboard.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import axios from "axios";
 import { Button } from "@/components/ui/Button";
-import { Alert, AlertDescription } from "@/components/ui/Alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
+ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useCredits } from "@/pages/CreditContext";
 import { motion } from "framer-motion";
 import { Zap, Rocket } from "lucide-react";
-import { exportStyledPdf } from "@/utils/pdfManager"; // 🧙‍♂️ Ton utilitaire magique unifié
+import { exportStyledPdf } from "@/utils/pdfManager";
+import { generateStyledHtml, styledCss } from "@/utils/reportTemplate";
 
 import {
   PieChart,
@@ -24,13 +26,13 @@ import {
   Legend,
 } from "recharts";
 
-const PIE_COLORS = ["#7C3AED", "#F472B6", "#EF4444"]; // violet, rose, rouge
+const PIE_COLORS = ["#7C3AED", "#F472B6", "#EF4444"]; // violet, rose, red
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { credits } = useCredits();
+  const { credits, updateCredits } = useCredits();
   const [localCredits, setLocalCredits] = useState(null);
   const [error, setError] = useState("");
   const [stats, setStats] = useState(null);
@@ -38,44 +40,46 @@ export default function Dashboard() {
   const [lineData, setLineData] = useState([]);
   const navigate = useNavigate();
 
-  // 🪄 Fonction utilitaire : charge les crédits depuis Supabase
-  const ensureCreditsLoaded = useCallback(async (userId) => {
-    try {
-      const { data: pRow, error: pErr } = await supabase
-        .from("profiles")
-        .select("credits")
-        .eq("id", userId)
-        .single();
-      if (!pErr && pRow) {
-        setLocalCredits(pRow.credits ?? 0);
-        return;
+  const ensureCreditsLoaded = useCallback(
+    async (userId) => {
+      try {
+        const { data: pRow, error: pErr } = await supabase
+          .from("profiles")
+          .select("credits")
+          .eq("id", userId)
+          .single();
+        if (!pErr && pRow) {
+          setLocalCredits(pRow.credits ?? 0);
+          return;
+        }
+      } catch (e) {
+        console.warn("[Dashboard] error reading credits:", e);
       }
-    } catch (e) {
-      console.warn("[Dashboard] error reading credits:", e);
-    }
-    setLocalCredits((prev) => prev ?? credits ?? 0);
-  }, [credits]);
+      setLocalCredits((prev) => prev ?? credits ?? 0);
+    },
+    [credits]
+  );
 
-  // 🧮 Construit les données pour le graphique linéaire
-  function buildLineData(reports) {
-    const daily = {};
-    const filtered = Object.values(
-      reports
-        .filter((r) => r.is_final)
-        .reduce((acc, r) => ({ ...acc, [r.id]: r }), {})
-    );
+function buildLineData(reports) {
+  const daily = {};
 
-    filtered.forEach((r) => {
-      const date = new Date(r.created_at).toISOString().slice(0, 10);
-      if (!daily[date]) daily[date] = Number(r.total_emails || 0);
-    });
+  // Prend uniquement les rapports finaux et uniques
+  const filtered = Object.values(
+    reports
+      .filter(r => r.is_final)
+      .reduce((acc, r) => ({ ...acc, [r.id]: r }), {})
+  );
 
-    return Object.entries(daily)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, emails]) => ({ date, emails }));
-  }
+  filtered.forEach(r => {
+    const date = new Date(r.created_at).toISOString().slice(0, 10);
+    if (!daily[date]) daily[date] = Number(r.total_emails || 0);
+  });
 
-  // ⚙️ Chargement principal du Dashboard
+  return Object.entries(daily)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, emails]) => ({ date, emails }));
+}
+
   useEffect(() => {
     let mounted = true;
     const loadData = async () => {
@@ -83,6 +87,7 @@ export default function Dashboard() {
         setLoading(true);
         setError("");
 
+        // 1) Auth
         const { data: userData, error: authErr } = await supabase.auth.getUser();
         if (authErr) throw authErr;
         const currentUser = userData?.user ?? null;
@@ -95,44 +100,49 @@ export default function Dashboard() {
         }
         if (mounted) setUser(currentUser);
 
+        // 2) Credits
         await ensureCreditsLoaded(currentUser.id);
 
+        // 3) Stats (backend)
         let statsObj = null;
         try {
           const statsRes = await axios.get(`${API_BASE}/stats/${currentUser.id}`);
           statsObj = statsRes.data;
         } catch (e) {
-          console.warn("[Dashboard] /stats fetch failed:", e.message || e);
+          console.warn("[Dashboard] /stats fetch failed, will compute from reports:", e.message || e);
         }
 
+        // 4) Reports (history) - try both user_id and user fields
         let reports = [];
         try {
-          const [{ data: reportsByUserId }, { data: reportsByUser }] = await Promise.all([
+          const [{ data: reportsByUserId, error: err1 }, { data: reportsByUser, error: err2 }] = await Promise.all([
             supabase
               .from("reports")
-              .select("id, report_text, sentiment_overall, classification, total_emails, created_at, is_final, mini_report_ids, highlights, mini_reports")
+              .select("id, report_text, sentiment_overall, classification, total_emails, created_at, is_final, mini_report_ids")
               .eq("user_id", currentUser.id)
               .order("created_at", { ascending: false })
               .limit(200),
             supabase
               .from("reports")
-              .select("id, report_text, sentiment_overall, classification, total_emails, created_at, is_final, mini_report_ids, highlights, mini_reports")
+              .select("id, report_text, sentiment_overall, classification, total_emails, created_at, is_final, mini_report_ids")
               .eq("user", currentUser.id)
               .order("created_at", { ascending: false })
               .limit(200),
           ]);
 
+          if (err1) console.warn("[Dashboard] reports user_id fetch error:", err1);
+          if (err2) console.warn("[Dashboard] reports user fetch error:", err2);
+
           const allReports = [...(reportsByUserId || []), ...(reportsByUser || [])];
           const uniqueReports = Array.from(new Map(allReports.map((r) => [r.id, r])).values());
 
-          reports = uniqueReports
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(0, 200);
+          reports = uniqueReports.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 200);
         } catch (repErr) {
           console.error("[Dashboard] reports fetch fatal error:", repErr);
           throw repErr;
         }
 
+        // normalize
         const normalized = (reports || []).map((r) => ({
           id: r.id,
           report_text: r.report_text ?? "",
@@ -140,8 +150,6 @@ export default function Dashboard() {
           total_emails: r.total_emails ?? 0,
           created_at: r.created_at,
           is_final: r.is_final ?? false,
-          highlights: r.highlights ?? [],
-          mini_reports: r.mini_reports ?? [],
         }));
 
         if (mounted) {
@@ -197,18 +205,26 @@ export default function Dashboard() {
 
     return () => {
       try {
-        if (subscription && typeof subscription.unsubscribe === "function")
-          subscription.unsubscribe();
+        if (subscription && typeof subscription.unsubscribe === "function") subscription.unsubscribe();
       } catch (e) {}
     };
   }, [ensureCreditsLoaded]);
 
-  // 🧾 Téléchargement d’un PDF à partir d’un rapport existant
-  const downloadReportPdf = async (report) => {
-    await exportStyledPdf(report, user?.email);
-  };
+const downloadReportPdf = async (report) => {
+  try {
+    if (!report) return alert("Aucun rapport à exporter !");
+    await exportStyledPdf(report, () => generateStyledHtml(report), styledCss, `Rapport_${report.id}`);
+  } catch (e) {
+    console.error("downloadReportPdf error:", e);
+    alert("Erreur lors de la génération du PDF (voir console).");
+  }
+};
 
-  // 🧁 Données pour le graphique circulaire
+const downloadReportPdf = async (report) => {
+  await exportStyledPdf(report, user?.email, styledCss, `Rapport_${report.id}`);
+};
+
+  // small derived data for charts
   const pieData = [
     { name: "Positifs", value: stats?.avg?.positive ?? 0 },
     { name: "Neutres", value: stats?.avg?.neutral ?? 0 },
@@ -221,9 +237,7 @@ export default function Dashboard() {
     return (
       <div className="p-6">
         <Alert>
-          <AlertDescription>
-            Connecte-toi avec Resumail pour accéder au dashboard.
-          </AlertDescription>
+          <AlertDescription>Connecte-toi avec Resumail pour accéder au dashboard.</AlertDescription>
         </Alert>
       </div>
     );
@@ -341,9 +355,10 @@ export default function Dashboard() {
                           <td className="px-4 py-2 text-gray-700 text-center">{r.total_emails || 0}</td>
                           <td className="px-4 py-2 text-gray-600 max-w-xs truncate">{r.report_text?.slice(0, 120) || "—"}</td>
                           <td className="px-4 py-2">
-                           <Button onClick={() => downloadReportPdf(r)}>
-                Télécharger le PDF
-              </Button>
+                            <Button size="sm" variant="outline" className="text-violet-600 border-violet-200 hover:bg-violet-50" onClick={() => downloadReportPdf(r.id)}>
+                              Télécharger PDF
+                            </Button>
+                            
                           </td>
                         </tr>
                       ))}
