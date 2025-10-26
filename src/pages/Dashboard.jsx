@@ -9,6 +9,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
 import { useCredits } from "@/pages/CreditContext";
 import { motion } from "framer-motion";
 import { Zap, Rocket } from "lucide-react";
+import { exportStyledPdf } from "@/utils/pdfManager";
 
 import {
   PieChart,
@@ -208,16 +209,10 @@ function buildLineData(reports) {
     };
   }, [ensureCreditsLoaded]);
 
-  const downloadReportPdf = async (id) => {
-    if (!id) return alert("Aucun ID de rapport disponible.");
-    try {
-      const url = `${API_BASE}/reports/${id}/pdf`;
-      window.open(url, "_blank");
-    } catch (e) {
-      console.error("downloadReportPdf error:", e);
-      alert("Erreur lors de l'ouverture du PDF (voir console).");
-    }
-  };
+const downloadReportPdf = async (id) => {
+  if (!id) return alert("Aucun rapport disponible.");
+  await exportStyledPdf(id, generateStyledHtml, styledCss, `Rapport_${report.id}`);
+};
 
   // small derived data for charts
   const pieData = [
