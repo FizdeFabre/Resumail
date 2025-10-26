@@ -9,8 +9,6 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
 import { useCredits } from "@/pages/CreditContext";
 import { motion } from "framer-motion";
 import { Zap, Rocket } from "lucide-react";
-import { exportStyledPdf } from "@/utils/pdfManager";
-import { generateStyledHtml, styledCss } from "@/utils/reportTemplate";
 
 import {
   PieChart,
@@ -60,25 +58,17 @@ export default function Dashboard() {
     [credits]
   );
 
-function buildLineData(reports) {
-  const daily = {};
-
-  // Prend uniquement les rapports finaux et uniques
-  const filtered = Object.values(
-    reports
-      .filter(r => r.is_final)
-      .reduce((acc, r) => ({ ...acc, [r.id]: r }), {})
-  );
-
-  filtered.forEach(r => {
-    const date = new Date(r.created_at).toISOString().slice(0, 10);
-    if (!daily[date]) daily[date] = Number(r.total_emails || 0);
-  });
-
-  return Object.entries(daily)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, emails]) => ({ date, emails }));
-}
+  function buildLineData(reports) {
+    const map = {};
+    reports.forEach((r) => {
+      const date = r.created_at ? new Date(r.created_at).toISOString().slice(0, 10) : "unknown";
+      map[date] = map[date] || 0;
+      map[date] += Number(r.total_emails || 0);
+    });
+    return Object.keys(map)
+      .sort()
+      .map((d) => ({ date: d, emails: map[d] }));
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -212,7 +202,6 @@ function buildLineData(reports) {
 
 const downloadReportPdf = async (report) => {
   try {
-    // 1️⃣ On récupère le rapport complet depuis Supabase
     const { data: fullReport, error } = await supabase
       .from("reports")
       .select("*")
@@ -221,20 +210,18 @@ const downloadReportPdf = async (report) => {
 
     if (error) throw error;
 
-    // 2️⃣ On merge les données (au cas où certaines viendraient du dashboard)
-    const mergedReport = {
+    const merged = {
       ...report,
       ...fullReport,
-      highlights: fullReport?.highlights ?? report.highlights ?? [],
-      mini_reports: fullReport?.mini_reports ?? report.mini_reports ?? [],
-      classification: fullReport?.classification ?? report.classification ?? {},
+      highlights: fullReport?.highlights ?? [],
+      mini_reports: fullReport?.mini_reports ?? [],
+      classification: fullReport?.classification ?? {},
     };
 
-    // 3️⃣ On exporte avec les données fraîches
-    await exportStyledPdf(mergedReport, user?.email);
+    await exportStyledPdf(merged, user?.email);
   } catch (err) {
-    console.error("Erreur lors du téléchargement du rapport complet :", err);
-    alert("Impossible de charger les données complètes du rapport avant export.");
+    console.error("Erreur export PDF :", err);
+    alert("Impossible d’exporter le rapport complet. Regarde la console pour les détails.");
   }
 };
 
@@ -309,6 +296,27 @@ const downloadReportPdf = async (report) => {
             </CardContent>
           </Card>
 
+/* 
+
+          <Card className="col-span-1">
+            <CardHeader>
+              <CardTitle>Répartition des sentiments</CardTitle>
+            </CardHeader>
+            <CardContent style={{ height: 220 }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={44} outerRadius={80} paddingAngle={4}>
+                    {pieData.map((entry, idx) => (
+                      <Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => `${v}`} />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+       </Card>
+
           <Card className="col-span-1">
             <CardHeader>
               <CardTitle>Tendance — Emails traités</CardTitle>
@@ -326,7 +334,6 @@ const downloadReportPdf = async (report) => {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-
         </div>
       </motion.div>
 
@@ -369,10 +376,14 @@ const downloadReportPdf = async (report) => {
                           <td className="px-4 py-2 text-gray-700 text-center">{r.total_emails || 0}</td>
                           <td className="px-4 py-2 text-gray-600 max-w-xs truncate">{r.report_text?.slice(0, 120) || "—"}</td>
                           <td className="px-4 py-2">
-                            <Button size="sm" variant="outline" className="text-violet-600 border-violet-200 hover:bg-violet-50" onClick={() => downloadReportPdf(r.id)}>
-                              Télécharger PDF
-                            </Button>
-                            
+                     <Button
+  size="sm"
+  variant="outline"
+  className="text-violet-600 border-violet-200 hover:bg-violet-50"
+  onClick={() => downloadReportPdf(r)}
+>
+  Télécharger PDF
+</Button>
                           </td>
                         </tr>
                       ))}
