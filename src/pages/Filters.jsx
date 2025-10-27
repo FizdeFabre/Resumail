@@ -7,9 +7,8 @@
     import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
     import { supabase } from "../supabaseClient";
     import { Loader2 } from "lucide-react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import { exportStyledPdf } from "@/utils/pdfManager";
+
+    import { exportStyledPdf } from "../utils/pdfManager"; 
 
   import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
 
