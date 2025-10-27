@@ -1,6 +1,6 @@
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { generateStyledHtml, styledCss } from "./reportTemplate.js";
+import { generateStyledHtml, styledCss } from "./reportTemplate.js"
 
 export async function exportStyledPdf(report, gmailUser = "—") {
   if (!report) {

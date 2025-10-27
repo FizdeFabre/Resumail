@@ -282,5 +282,3 @@ export const styledCss = `
     margin-top: 2px;
   }
 `;
-
-export { generateStyledHtml, styledCss, escapeHtml };
