@@ -15,27 +15,23 @@ export async function exportStyledPdf(report, gmailUser = "—") {
     container.innerHTML = `
       <div id="pdf-content" style="
         background: white;
-        width: 794px; /* format A4 largeur px à 96dpi */
+        width: 794px; /* A4 à 96 dpi */
         padding: 40px;
-        color: #111;
         font-family: 'Inter', sans-serif;
       ">
         <style>${styledCss}</style>
         ${html}
-      </div>
-    `;
+      </div>`;
     container.style.position = "fixed";
     container.style.top = "-9999px";
     document.body.appendChild(container);
 
     const pdfContent = container.querySelector("#pdf-content");
 
-    // Capture fidèle du DOM
     const canvas = await html2canvas(pdfContent, {
-      scale: 2, // assez précis sans bug de coupure
+      scale: 2,
       useCORS: true,
-      backgroundColor: "#ffffff",
-      logging: false,
+      backgroundColor: "#fff",
       scrollX: 0,
       scrollY: 0,
       windowWidth: pdfContent.scrollWidth,
@@ -43,24 +39,19 @@ export async function exportStyledPdf(report, gmailUser = "—") {
     });
 
     const imgData = canvas.toDataURL("image/png");
-
-    // Paramètres du PDF
     const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-
-    // Conversion px -> points
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     let position = 0;
     let heightLeft = imgHeight;
 
-    // Première page
     pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
     heightLeft -= pageHeight;
 
-    // Pages suivantes sans coupure ni saut visuel
     while (heightLeft > 0) {
       position = heightLeft - imgHeight;
       pdf.addPage();

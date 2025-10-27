@@ -404,86 +404,6 @@ async function analyzeSelection() {
           .replace(/'/g, "&#039;");
       }
 
-      const generateStyledHtml = () => {
-      if (!report) return "";
-      const title = "Resumail — Rapport";
-      const dateStr = new Date().toLocaleString();
-      const userStr = gmailUser || "—";
-      const summary = (report.report_text || report.summary || "").replace(/\n/g, "<br/>");
-
-      const highlightsHtml = (report.highlights || []).length
-        ? (report.highlights || [])
-            .map((h) =>
-              typeof h === "string"
-                ? `<div class="highlight-item">${escapeHtml(h)}</div>`
-                : `<div class="highlight-item">${escapeHtml(h.text || JSON.stringify(h))} <span class="meta">(${h.count ?? ""} — ${h.pct ?? ""})</span></div>`
-            )
-            .join("")
-        : `<p class="muted">Aucun point marquant détecté.</p>`;
-
-      const positive = report.classification?.positive ?? 0;
-      const negative = report.classification?.negative ?? 0;
-      const neutral = report.classification?.neutral ?? 0;
-      const other = report.classification?.other ?? 0;
-      const total = report.total_emails ?? (positive + negative + neutral + other);
-    const miniReports = Array.isArray(report.mini_reports)
-      ? report.mini_reports
-      : report.miniReports
-      ? report.miniReports
-      : [];
-
-    const miniReportsHtml = miniReports.length
-      ? miniReports
-          .map(
-            (r, i) => `
-            <div class="mini-report">
-              <h3>📨 Mini-rapport ${i + 1}</h3>
-              <p>${escapeHtml(r.title || r.label || "—")}</p>
-              <div class="mini-summary">
-                ${escapeHtml(r.text || r.summary || "Aucun contenu.").replace(/\n/g, "<br/>")}
-              </div>
-            </div>`
-          )
-          .join("")
-      : `<p class="muted">Aucun mini-rapport disponible.</p>`
-
-      return `
-        <div class="container">
-          <header>
-            <h1>📊 Rapport Resumail</h1>
-            <div class="subtitle">${escapeHtml(userStr)} — ${escapeHtml(dateStr)}</div>
-          </header>
-
-          <div class="card">
-            <h2>📝 Résumé</h2>
-            <div class="summary"><p>${summary || "<span class='muted'>Aucun résumé disponible.</span>"}</p></div>
-          </div>
-
-          <div class="card">
-            <h2>📈 Statistiques</h2>
-            <p>Total emails analysés : <strong>${escapeHtml(String(total))}</strong></p>
-            <div class="grid">
-              <div class="stat"><div class="value">${positive}</div><div>Positifs</div></div>
-              <div class="stat"><div class="value">${negative}</div><div>Négatifs</div></div>
-              <div class="stat"><div class="value">${neutral}</div><div>Neutres</div></div>
-              <div class="stat"><div class="value">${other}</div><div>Autres</div></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h2>✨ Points récurrents</h2>
-            ${highlightsHtml}
-          </div>
-
-          <div class="card">
-      <h2>📬 Mini-rapports détaillés</h2>
-      ${miniReportsHtml}
-    </div>
-
-          <footer>Rapport généré automatiquement par Resumail — ${escapeHtml(dateStr)}</footer>
-        </div>`;
-    };
-
     const styledCss = `
       @page { margin: 18mm; }
       body { font-family: Inter, "Segoe UI", Roboto, sans-serif; color: #0f172a; background: #f8fafc; margin: 0; padding: 24px; }
@@ -521,91 +441,6 @@ async function analyzeSelection() {
       line-height: 1.4;
     }
     `;
-
-    const handlePrintStyled = () => {
-      const html = generateStyledHtml();
-      const w = window.open("", "_blank");
-      w.document.write(`<html><head><style>${styledCss}</style></head><body>${html}</body></html>`);
-      w.document.close();
-      w.focus();
-      setTimeout(() => w.print(), 400);
-    };
-
-const handleDownloadStyledPdf = async () => {
-  try {
-    if (!report) {
-      alert("Aucun rapport à exporter !");
-      return;
-    }
-
-    // 🧩 1. On génère le HTML complet
-    const html = generateStyledHtml();
-
-    // 🧩 2. On crée un conteneur caché dans le DOM
-    const container = document.createElement("div");
-    container.innerHTML = `
-      <div id="pdf-content" style="
-        background: white;
-        width: 794px; /* correspond à A4 */
-        padding: 40px;
-        color: #111;
-        font-family: 'Inter', sans-serif;
-      ">
-        <style>${styledCss}</style>
-        ${html}
-      </div>
-    `;
-    container.style.position = "fixed";
-    container.style.top = "-9999px";
-    document.body.appendChild(container);
-
-    // 🧩 3. Capture haute résolution avec html2canvas
-    const pdfContent = container.querySelector("#pdf-content");
-    const canvas = await html2canvas(pdfContent, {
-      scale: 2.5, // augmente la qualité
-      useCORS: true,
-      backgroundColor: "#fff",
-      logging: false,
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-
-    // 🧩 4. Création du PDF jsPDF
-    const pdf = new jsPDF({
-      orientation: "p",
-      unit: "pt",
-      format: "a4",
-    });
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    // 🧩 5. Ajout de pages si nécessaire
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    // 🧩 6. Sauvegarde
-    pdf.save(`Resumail_Rapport_${new Date().toISOString().split("T")[0]}.pdf`);
-
-    // Nettoyage
-    document.body.removeChild(container);
-  } catch (err) {
-    console.error("🚨 Erreur PDF:", err);
-    alert("Erreur lors de la génération du PDF (voir console).");
-  }
-};
 
       // ------------------- Render -------------------
 return (
@@ -849,12 +684,12 @@ return (
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3 mt-4">
-            <Button
-              onClick={handleDownloadStyledPdf}
-              className="bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-lg px-4 py-2"
-            >
-              💾 Télécharger PDF
-            </Button>
+           <Button
+  onClick={() => exportStyledPdf(report, gmailUser)}
+  className="bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-lg px-4 py-2"
+>
+  💾 Télécharger PDF
+</Button>
           </div>
         </CardContent>
       </Card>

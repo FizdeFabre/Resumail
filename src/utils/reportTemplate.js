@@ -1,4 +1,7 @@
 // src/utils/reportTemplate.js
+
+export { generateStyledHtml, styledCss };
+
 export function escapeHtml(str) {
   if (typeof str !== "string") return str;
   return str
