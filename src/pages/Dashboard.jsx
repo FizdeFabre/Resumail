@@ -231,6 +231,7 @@ const downloadReportPdf = async (report) => {
     { name: "Positifs", value: stats?.avg?.positive ?? 0 },
     { name: "Neutres", value: stats?.avg?.neutral ?? 0 },
     { name: "Négatifs", value: stats?.avg?.negative ?? 0 },
+    { name: "Other", value: stats?.avg?.other ?? 0 },
   ];
 
   if (loading) return <div className="p-6 text-gray-500">Chargement…</div>;
@@ -296,8 +297,6 @@ const downloadReportPdf = async (report) => {
               <p className="text-sm text-gray-700 mt-1 line-clamp-3 break-words">{stats?.last_summary ?? "—"}</p>
             </CardContent>
           </Card>
-
-/* 
 
           <Card className="col-span-1">
             <CardHeader>
