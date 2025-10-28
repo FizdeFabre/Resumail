@@ -263,73 +263,70 @@ if (!user)
   );
 
 return (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900">
-    <div className="p-8 max-w-7xl mx-auto space-y-10">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-200">
+  <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500">
+    {/* Header sticky minimal */}
+    <header className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/20">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Bienvenue,{" "}
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              {user.email}
-            </span>
+          <h1 className="text-xl md:text-2xl font-bold text-white">
+            Bienvenue, <span className="text-white/80">{user.email}</span>
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Résumé rapide & historique — Resumail
-          </p>
+          <p className="text-white/70 text-sm">Résumé & historique — Resumail</p>
         </div>
-
         <div className="flex items-center gap-3">
-          <div className="text-right">
-            <p className="text-sm text-gray-500">Crédits restants</p>
-            <div className="text-2xl font-extrabold text-indigo-600">
-              {Number(localCredits ?? credits ?? 0)}
-            </div>
+          <div className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm">
+            Crédits&nbsp;: <span className="font-semibold">{Number(localCredits ?? credits ?? 0)}</span>
           </div>
           <Button
             variant="outline"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              navigate("/");
-            }}
-            className="border-gray-300 hover:bg-gray-100"
+            onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
+            className="bg-white/10 hover:bg-white/20 text-white border-white/30"
           >
             Déconnexion
           </Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button onClick={() => navigate("/billing")} className="bg-white text-indigo-700 hover:bg-gray-100">
             Recharge
           </Button>
         </div>
       </div>
+    </header>
 
-      {/* Gmail actions */}
+    {/* Body */}
+    <main className="max-w-7xl mx-auto px-6 py-8">
+      {/* Carte “verre” Connexion Gmail */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.2 }}
+        className="mb-8"
       >
-        <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-md hover:shadow-md transition-all">
-          <CardHeader>
-            <CardTitle className="text-indigo-700 font-semibold">
-              Connexion Gmail
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 md:flex md:items-center md:justify-between">
-            <p className="text-gray-600">
-              Connecte ta boîte Gmail pour activer les filtres et générer des rapports.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                onClick={() =>
-                  (window.location.href = `${API_BASE}/auth/google`)
-                }
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              >
-                Connecter Gmail
-              </Button>
+        <div className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
+          <div className="p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 className="text-white text-lg font-semibold">Connexion Gmail</h2>
+                <p className="text-white/80 text-sm">
+                  Connecte ta boîte Gmail pour activer les filtres et générer des rapports.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => (window.location.href = `${API_BASE}/auth/google`)}
+                  className="bg-white text-indigo-700 hover:bg-gray-100"
+                >
+                  Connecter une adresse Gmail
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/filters")}
+                  className="bg-white/10 hover:bg-white/20 text-white border-white/30"
+                >
+                  Aller aux filtres
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* Stats & Charts */}
@@ -337,32 +334,27 @@ return (
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="border-0 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-md transition-all">
-            <CardHeader>
-              <CardTitle className="text-gray-800 font-semibold">
-                Total d'emails analysés
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-indigo-600">
-                {stats?.total_emails ?? 0}
-              </div>
-              <p className="text-sm text-gray-500 mt-2">Dernier résumé :</p>
-              <p className="text-sm text-gray-700 mt-1 line-clamp-3 break-words">
-                {stats?.last_summary ?? "—"}
-              </p>
-            </CardContent>
-          </Card>
+        {/* Total emails + dernier résumé */}
+        <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+          <div className="p-6">
+            <h3 className="text-gray-900 font-semibold">Total d'emails analysés</h3>
+            <div className="text-4xl font-extrabold text-indigo-700 mt-2">
+              {stats?.total_emails ?? 0}
+            </div>
+            <p className="text-gray-500 text-sm mt-4">Dernier résumé :</p>
+            <p className="text-gray-800 text-sm mt-1 line-clamp-4 break-words">
+              {stats?.last_summary ?? "—"}
+            </p>
+          </div>
+        </div>
 
-          <Card className="border-0 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-md transition-all">
-            <CardHeader>
-              <CardTitle className="text-gray-800 font-semibold">
-                Répartition des sentiments
-              </CardTitle>
-            </CardHeader>
-            <CardContent style={{ height: 220 }}>
+        {/* Pie */}
+        <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+          <div className="p-6">
+            <h3 className="text-gray-900 font-semibold">Répartition des sentiments</h3>
+            <div style={{ height: 220 }} className="mt-3">
               <ResponsiveContainer>
                 <PieChart>
                   <Pie
@@ -371,103 +363,70 @@ return (
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    innerRadius={44}
-                    outerRadius={80}
+                    innerRadius={48}
+                    outerRadius={82}
                     paddingAngle={4}
                   >
                     {pieData.map((entry, idx) => (
-                      <Cell
-                        key={`cell-${idx}`}
-                        fill={PIE_COLORS[idx % PIE_COLORS.length]}
-                      />
+                      <Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(v) => `${v}`} />
                   <Legend verticalAlign="bottom" height={36} />
                 </PieChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </div>
 
-          <Card className="border-0 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-md transition-all">
-            <CardHeader>
-              <CardTitle className="text-gray-800 font-semibold">
-                Tendance — Emails traités
-              </CardTitle>
-            </CardHeader>
-            <CardContent style={{ height: 220 }}>
+        {/* Line */}
+        <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+          <div className="p-6">
+            <h3 className="text-gray-900 font-semibold">Tendance — Emails traités</h3>
+            <div style={{ height: 220 }} className="mt-3">
               <ResponsiveContainer>
                 <LineChart data={lineData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="emails"
-                    stroke="#7C3AED"
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                  />
+                  <Line type="monotone" dataKey="emails" stroke="#7C3AED" strokeWidth={2} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </motion.div>
 
-      {/* History */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Card className="border-0 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-md transition-all">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold text-indigo-700">
-              Historique des rapports finaux
-            </CardTitle>
-            <p className="text-sm text-gray-500 mt-1">
-              Consulte et télécharge tes analyses complètes.
-            </p>
-          </CardHeader>
-          <CardContent>
+      {/* Historique */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+          <div className="p-6 md:p-8">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Historique des rapports finaux</h3>
+              <p className="text-sm text-gray-500">Consulte et télécharge tes analyses complètes.</p>
+            </div>
+
             {history.filter((r) => r.is_final).length === 0 ? (
-              <p className="text-gray-500 italic text-sm">
-                Aucun rapport final enregistré pour l’instant.
-              </p>
+              <p className="text-gray-500 italic text-sm">Aucun rapport final enregistré pour l’instant.</p>
             ) : (
-              <div className="overflow-x-auto rounded-lg border border-gray-100">
-                <table className="min-w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50 border-b">
-                      <th className="px-4 py-2 text-left font-semibold text-gray-600">
-                        Date
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-600">
-                        Emails analysés
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-600">
-                        Résumé
-                      </th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-600">
-                        Actions
-                      </th>
+              <div className="overflow-x-auto rounded-xl border border-gray-200">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-600">Date</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-600">Emails</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-600">Résumé</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-600">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100">
                     {history
                       .filter((r) => r.is_final)
-                      .sort(
-                        (a, b) =>
-                          new Date(b.created_at) - new Date(a.created_at)
-                      )
+                      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                       .map((r) => (
-                        <tr
-                          key={r.id}
-                          className="border-b hover:bg-indigo-50/40 transition-all"
-                        >
+                        <tr key={r.id} className="hover:bg-gray-50/70">
                           <td className="px-4 py-2 text-gray-700">
                             {new Date(r.created_at).toLocaleString("fr-FR", {
                               day: "2-digit",
@@ -477,17 +436,13 @@ return (
                               minute: "2-digit",
                             })}
                           </td>
-                          <td className="px-4 py-2 text-gray-700 text-center">
-                            {r.total_emails || 0}
-                          </td>
-                          <td className="px-4 py-2 text-gray-600 max-w-xs truncate">
-                            {r.report_text?.slice(0, 120) || "—"}
-                          </td>
+                          <td className="px-4 py-2 text-gray-700">{r.total_emails || 0}</td>
+                          <td className="px-4 py-2 text-gray-600 max-w-xs truncate">{r.report_text?.slice(0, 140) || "—"}</td>
                           <td className="px-4 py-2">
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                              className="bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50"
                               onClick={() => downloadReportPdf(r)}
                             >
                               Télécharger PDF
@@ -499,49 +454,39 @@ return (
                 </table>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
-      {/* Purchase CTA */}
-      <div className="bg-gradient-to-r from-indigo-50 via-pink-50 to-indigo-50 border border-indigo-100 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all">
+      {/* CTA crédits */}
+      <div className="mt-8 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-6 flex flex-col md:flex-row items-center justify-between gap-4 text-white shadow-2xl">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Zap className="text-indigo-600" size={18} />
-            Booster de crédits
-          </h2>
-          <p className="text-gray-600 text-sm mt-1">
-            Il te reste{" "}
-            <span className="font-semibold text-indigo-700">
-              {Number(localCredits ?? credits ?? 0)}
-            </span>{" "}
-            crédits. Recharge maintenant pour analyser plus d'emails sans
-            attendre.
+          <h4 className="text-lg font-semibold">Booster de crédits</h4>
+          <p className="text-white/80 text-sm mt-1">
+            Il te reste <span className="font-semibold">{Number(localCredits ?? credits ?? 0)}</span> crédits. Recharge pour analyser plus d’emails.
           </p>
         </div>
         <div className="flex gap-3">
-          <Button
-            onClick={() => navigate("/billing")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
-          >
-            <Rocket size={16} /> Booster maintenant
+          <Button onClick={() => navigate("/billing")} className="bg-white text-indigo-700 hover:bg-gray-100">
+            Booster maintenant
           </Button>
           <Button
             variant="outline"
             onClick={() => updateCredits && updateCredits(user.id, 100)}
+            className="bg-white/10 hover:bg-white/20 text-white border-white/30"
           >
             +100 (test)
           </Button>
         </div>
       </div>
 
-      {/* Footer error */}
       {error && (
-        <Alert className="mt-4 bg-red-50 border border-red-200 text-red-600">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div className="mt-4 rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-3">
+          {error}
+        </div>
       )}
-    </div>
+    </main>
   </div>
 );
+
 }

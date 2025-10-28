@@ -443,227 +443,190 @@ async function analyzeSelection() {
 
       // ------------------- Render -------------------
 return (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50 font-sans text-gray-900 p-8">
-    <div className="max-w-6xl mx-auto space-y-10">
-      {/* === HEADER === */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-gray-200">
-        <h1 className="text-3xl font-bold">
-          <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            Filtrer ta boîte
-          </span>{" "}
-          — <span className="text-gray-800">{gmailUser}</span>
+  <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500">
+    {/* Header */}
+    <header className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/20">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <h1 className="text-xl md:text-2xl font-bold text-white">
+          Filtres — <span className="text-white/80">{gmailUser}</span>
         </h1>
-
         <div className="flex items-center gap-3">
+          <div className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm">
+            {creditsLeft ?? 0} crédits
+          </div>
           <Button
             onClick={() => navigate("/billing")}
-            className="transition bg-gradient-to-br from-yellow-400 to-yellow-600 hover:brightness-110 text-white shadow-md"
+            className="bg-white text-indigo-700 hover:bg-gray-100"
           >
             Acheter des crédits
           </Button>
+        </div>
+      </div>
+    </header>
 
-          <div className="px-3 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-sm shadow-sm">
-            {creditsLeft ?? 0} crédits
+    <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+      {/* Charger Gmail */}
+      <div className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
+        <div className="p-6 md:p-8">
+          <h2 className="text-white text-lg font-semibold">📥 Charger la boîte Gmail</h2>
+          <p className="text-white/80 text-sm mt-1">
+            Récupère les {maxToFetch} derniers emails reçus depuis ta boîte connectée.
+          </p>
+          <div className="mt-4">
+            <Button
+              onClick={fetchMailbox}
+              disabled={loading || !gmailUser}
+              className="bg-white text-indigo-700 hover:bg-gray-100"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" /> Chargement…
+                </>
+              ) : (
+                "Charger ma boîte"
+              )}
+            </Button>
+            {error && <p className="text-red-200 text-sm mt-3">{error}</p>}
           </div>
         </div>
       </div>
 
-      {/* === CHARGEMENT GMAIL === */}
-      <Card className="border-0 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-md transition-all">
-        <CardHeader>
-          <CardTitle className="text-indigo-700 font-semibold flex items-center gap-2">
-            <span>📥</span> Charger la boîte Gmail
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-gray-600">
-            Récupère les 500 derniers emails reçus depuis ta boîte connectée.
-          </p>
-          <Button
-            onClick={fetchMailbox}
-            disabled={loading || !gmailUser}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin h-4 w-4" /> Chargement…
-              </>
-            ) : (
-              "Charger ma boîte"
-            )}
-          </Button>
-          {error && <p className="text-red-600 text-sm">{error}</p>}
-        </CardContent>
-      </Card>
+      {/* Paramètres de filtrage */}
+      <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+        <div className="p-6 md:p-8">
+          <h2 className="text-gray-900 text-lg font-semibold">⚙️ Paramètres de filtrage</h2>
 
-      {/* === PARAMÈTRES DE FILTRAGE === */}
-      <Card className="border-0 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-md transition-all">
-        <CardHeader>
-          <CardTitle className="text-indigo-700 font-semibold flex items-center gap-2">
-            ⚙️ Paramètres de filtrage
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Expéditeurs */}
-          <div>
-            <h2 className="text-lg font-semibold text-indigo-600 mb-2">
-              Filtrage des expéditeurs
-            </h2>
-            <p className="text-sm text-gray-500 mb-2">
-              Liste d’expéditeurs à ignorer (séparés par des virgules).
-            </p>
-            <Input
-              placeholder="Ex: pub@, noreply@, newsletter@..."
-              value={filters.ignoreSenders}
-              onChange={(e) =>
-                setFilters({ ...filters, ignoreSenders: e.target.value })
-              }
-              className="border-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          {/* Mots-clés */}
-          <div>
-            <h2 className="text-lg font-semibold text-pink-600 mb-2">
-              Filtrage par mots-clés
-            </h2>
-            <p className="text-sm text-gray-500 mb-2">
-              Mots-clés à ignorer dans le contenu ou le sujet.
-            </p>
-            <Input
-              placeholder="Ex: promo, urgent, vente..."
-              value={filters.ignoreKeywords}
-              onChange={(e) =>
-                setFilters({ ...filters, ignoreKeywords: e.target.value })
-              }
-              className="border-gray-200 focus:ring-pink-500 focus:border-pink-500"
-            />
-          </div>
-
-          {/* Dates */}
-          <div>
-            <h2 className="text-lg font-semibold text-indigo-600 mb-2">
-              Filtrage par date
-            </h2>
-            <p className="text-sm text-gray-500 mb-2">
-              Choisis la période à analyser.
-            </p>
-            <div className="flex gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            {/* Expéditeurs */}
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <h3 className="text-indigo-700 font-semibold mb-1">Filtrage des expéditeurs</h3>
+              <p className="text-gray-500 text-sm mb-3">
+                Liste d’expéditeurs à ignorer (séparés par des virgules).
+              </p>
               <Input
-                type="date"
-                value={filters.startDate}
-                onChange={(e) =>
-                  setFilters({ ...filters, startDate: e.target.value })
-                }
-                className="border-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Ex: pub@, noreply@, newsletter@..."
+                value={filters.ignoreSenders}
+                onChange={(e) => setFilters({ ...filters, ignoreSenders: e.target.value })}
+                className="bg-white"
               />
+            </div>
+
+            {/* Mots-clés */}
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <h3 className="text-indigo-700 font-semibold mb-1">Filtrage par mots-clés</h3>
+              <p className="text-gray-500 text-sm mb-3">Mots-clés à ignorer dans le contenu ou le sujet.</p>
               <Input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) =>
-                  setFilters({ ...filters, endDate: e.target.value })
-                }
-                className="border-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Ex: promo, urgent, vente..."
+                value={filters.ignoreKeywords}
+                onChange={(e) => setFilters({ ...filters, ignoreKeywords: e.target.value })}
+                className="bg-white"
               />
+            </div>
+
+            {/* Dates */}
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <h3 className="text-indigo-700 font-semibold mb-1">Filtrage par date</h3>
+              <p className="text-gray-500 text-sm mb-3">Choisis la période à analyser.</p>
+              <div className="flex gap-2">
+                <Input
+                  type="date"
+                  value={filters.startDate}
+                  onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                  className="bg-white"
+                />
+                <Input
+                  type="date"
+                  value={filters.endDate}
+                  onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                  className="bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Taille */}
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <h3 className="text-indigo-700 font-semibold mb-1">Taille du message</h3>
+              <p className="text-gray-500 text-sm mb-3">Filtrer selon le nombre de mots du contenu.</p>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="Min"
+                  value={filters.minWords}
+                  onChange={(e) => setFilters({ ...filters, minWords: parseInt(e.target.value || "0") })}
+                  className="bg-white"
+                />
+                <Input
+                  type="number"
+                  placeholder="Max"
+                  value={filters.maxWords}
+                  onChange={(e) => setFilters({ ...filters, maxWords: parseInt(e.target.value || "10000") })}
+                  className="bg-white"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Taille */}
-          <div>
-            <h2 className="text-lg font-semibold text-pink-600 mb-2">
-              Taille du message
-            </h2>
-            <p className="text-sm text-gray-500 mb-2">
-              Filtrer selon le nombre de mots du contenu.
-            </p>
-            <div className="flex gap-2">
-              <Input
-                type="number"
-                placeholder="Min"
-                value={filters.minWords}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    minWords: parseInt(e.target.value || "0"),
-                  })
-                }
-                className="border-gray-200 focus:ring-pink-500 focus:border-pink-500"
-              />
-              <Input
-                type="number"
-                placeholder="Max"
-                value={filters.maxWords}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    maxWords: parseInt(e.target.value || "10000"),
-                  })
-                }
-                className="border-gray-200 focus:ring-pink-500 focus:border-pink-500"
-              />
-            </div>
-          </div>
-        </CardContent>
-
-        <div className="flex flex-wrap gap-3 p-4 border-t border-gray-100">
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
-            Appliquer
-          </Button>
-          <Button variant="outline" onClick={resetDisplayedFilters}>
-            Réinitialiser
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={clearAllFiltersInputs}
-            className="bg-pink-100 text-pink-700 hover:bg-pink-200"
-          >
-            Vider
-          </Button>
-        </div>
-      </Card>
-
-      {/* === RÉSULTATS === */}
-      <Card className="border-0 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-md transition-all">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-indigo-700 font-semibold">
-            📑 Résultats ({emailsShown.length} affichés / {emailsOriginal.length} récupérés)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2 mb-4">
-            <Button onClick={selectAllShown}>Tout sélectionner</Button>
-            <Button onClick={deselectAll} variant="outline">
-              Tout désélectionner
+          <div className="flex flex-wrap gap-3 pt-4">
+            <Button onClick={applyFilters} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              Appliquer
+            </Button>
+            <Button variant="outline" onClick={resetDisplayedFilters} className="border-gray-300 text-gray-700">
+              Réinitialiser
             </Button>
             <Button
-              onClick={analyzeSelection}
-              disabled={analyzing}
-              className="bg-gradient-to-r from-indigo-600 to-pink-600 text-white hover:opacity-90"
+              variant="secondary"
+              onClick={clearAllFiltersInputs}
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200"
             >
-              {analyzing ? "⚡ Analyse en cours…" : "🤖 Analyser la sélection"}
+              Vider
             </Button>
           </div>
+        </div>
+      </div>
 
-          <div className="space-y-2 overflow-y-auto max-h-[500px] pr-1">
+      {/* Résultats */}
+      <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+        <div className="p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <h2 className="text-gray-900 font-semibold">
+              📑 Résultats ({emailsShown.length} affichés / {emailsOriginal.length} récupérés)
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={selectAllShown} className="bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50">
+                Tout sélectionner
+              </Button>
+              <Button onClick={deselectAll} variant="outline" className="border-gray-300 text-gray-700">
+                Tout désélectionner
+              </Button>
+              <Button
+                onClick={analyzeSelection}
+                disabled={analyzing}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              >
+                {analyzing ? "⚡ Analyse en cours…" : "🤖 Analyser la sélection"}
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
             {emailsShown.map((e) => (
               <div
                 key={e.id}
-                className={`p-4 border rounded-xl shadow-sm flex gap-3 items-start transition hover:bg-indigo-50/40 ${
-                  selectedMap[e.id]
-                    ? "bg-indigo-50 border-indigo-300"
-                    : "border-gray-200"
-                }`}
+                className={[
+                  "p-4 border rounded-xl shadow-sm flex gap-3 items-start transition",
+                  "bg-white hover:bg-gray-50",
+                  selectedMap[e.id] ? "border-indigo-300 ring-2 ring-indigo-100" : "border-gray-200",
+                ].join(" ")}
               >
                 <Checkbox
                   checked={!!selectedMap[e.id]}
                   onCheckedChange={() => toggleSelectEmail(e.id)}
-                  className="mt-1 accent-indigo-600"
+                  className="mt-1"
                 />
                 <div className="flex-1">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-semibold text-gray-900">{e.subject}</h4>
-                    <span className="text-gray-500 text-sm">{e.from}</span>
+                  <div className="flex justify-between items-center gap-3">
+                    <h4 className="font-semibold text-gray-900 line-clamp-1">{e.subject}</h4>
+                    <span className="text-gray-500 text-sm shrink-0">{e.from}</span>
                   </div>
                   <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">
                     {(e.body || "").slice(0, 300)}
@@ -673,77 +636,56 @@ return (
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* === RAPPORT IA === */}
+      {/* Rapport IA */}
       {report && (
-        <Card className="border-0 bg-white/90 backdrop-blur-md shadow-sm hover:shadow-md transition-all">
-          <CardHeader>
-            <CardTitle className="text-indigo-700 font-semibold flex items-center gap-2">
-              📊 Rapport IA
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+          <div className="p-6 md:p-8 space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">📊 Rapport IA</h3>
+              <p className="text-sm text-gray-500">Résumé et indicateurs clés</p>
+            </div>
+
             {/* Résumé */}
-            <section className="bg-white/80 p-4 rounded-lg shadow-sm">
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">
-                📝 Résumé
-              </h3>
+            <section className="bg-white p-4 rounded-xl border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-2">📝 Résumé</h4>
               <p className="text-gray-700 whitespace-pre-wrap">
                 {report.report_text || report.summary || "—"}
               </p>
             </section>
 
             {/* Stats */}
-            <section className="bg-white/80 p-4 rounded-lg shadow-sm">
-              <h3 className="font-semibold text-lg mb-3 text-gray-800">
-                📈 Statistiques générales
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {[
-                  {
-                    label: "Total emails",
-                    value: report.total_emails ?? 0,
-                    color: "bg-indigo-100",
-                  },
-                  {
-                    label: "Positifs",
-                    value: report.classification?.positive ?? 0,
-                    color: "bg-green-100",
-                  },
-                  {
-                    label: "Négatifs",
-                    value: report.classification?.negative ?? 0,
-                    color: "bg-red-100",
-                  },
-                  {
-                    label: "Neutres",
-                    value: report.classification?.neutral ?? 0,
-                    color: "bg-yellow-100",
-                  },
-                  {
-                    label: "Autres",
-                    value: report.classification?.other ?? 0,
-                    color: "bg-gray-200",
-                  },
-                ].map((s, i) => (
-                  <div
-                    key={i}
-                    className={`${s.color} p-3 rounded-lg text-center`}
-                  >
-                    <span className="block font-bold text-xl">{s.value}</span>
-                    {s.label}
-                  </div>
-                ))}
+            <section className="bg-white p-4 rounded-xl border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-3">📈 Statistiques générales</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="bg-indigo-50 p-3 rounded-lg text-center border border-indigo-100">
+                  <span className="block font-bold text-xl text-indigo-700">{report.total_emails ?? 0}</span>
+                  <span className="text-gray-700">Total</span>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg text-center border border-green-100">
+                  <span className="block font-bold text-xl text-green-700">{report.classification?.positive ?? 0}</span>
+                  <span className="text-gray-700">Positifs</span>
+                </div>
+                <div className="bg-yellow-50 p-3 rounded-lg text-center border border-yellow-100">
+                  <span className="block font-bold text-xl text-yellow-700">{report.classification?.neutral ?? 0}</span>
+                  <span className="text-gray-700">Neutres</span>
+                </div>
+                <div className="bg-red-50 p-3 rounded-lg text-center border border-red-100">
+                  <span className="block font-bold text-xl text-red-700">{report.classification?.negative ?? 0}</span>
+                  <span className="text-gray-700">Négatifs</span>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg text-center border border-gray-200">
+                  <span className="block font-bold text-xl text-gray-800">{report.classification?.other ?? 0}</span>
+                  <span className="text-gray-700">Autres</span>
+                </div>
               </div>
             </section>
 
             {/* Points récurrents */}
-            <section className="bg-white/80 p-4 rounded-lg shadow-sm">
-              <h3 className="font-semibold text-lg mb-2 text-gray-800">
-                💡 Points récurrents
-              </h3>
+            <section className="bg-white p-4 rounded-xl border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-2">💡 Points récurrents</h4>
               <ul className="list-disc list-inside text-gray-700 space-y-1">
                 {(report.highlights || []).length ? (
                   report.highlights.map((h, i) =>
@@ -751,34 +693,31 @@ return (
                       <li key={i}>{h}</li>
                     ) : (
                       <li key={i}>
-                        {h.text}{" "}
-                        {h.count ? `(${h.count})` : ""}{" "}
-                        {h.pct ? `— ${h.pct}` : ""}
+                        {h.text} {h.count ? `(${h.count})` : ""} {h.pct ? `— ${h.pct}` : ""}
                       </li>
                     )
                   )
                 ) : (
-                  <li className="text-gray-500">
-                    Aucun point marquant détecté.
-                  </li>
+                  <li className="text-gray-500">Aucun point marquant détecté.</li>
                 )}
               </ul>
             </section>
 
             {/* Actions */}
-            <div className="flex flex-wrap gap-3 mt-4">
+            <div className="flex flex-wrap gap-3">
               <Button
                 onClick={() => exportStyledPdf(report, gmailUser)}
-                className="bg-gradient-to-r from-indigo-600 to-pink-600 hover:opacity-90 text-white font-semibold rounded-lg px-4 py-2"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg px-4 py-2"
               >
                 💾 Télécharger PDF
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
-    </div>
+    </main>
   </div>
 );
+
 
     }
