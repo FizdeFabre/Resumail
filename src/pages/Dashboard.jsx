@@ -327,13 +327,6 @@ return (
               >
                 Connecter Gmail
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/filters")}
-                className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-              >
-                Aller aux filtres
-              </Button>
             </div>
           </CardContent>
         </Card>
