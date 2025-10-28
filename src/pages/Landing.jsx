@@ -46,6 +46,8 @@ export default function Landing() {
 
         <p className="text-lg md:text-xl text-white/90 max-w-2xl mb-10">
           Resumail transforms your inbox into clean, actionable summaries.  
+        </p>
+          <p className="text-lg md:text-xl text-white/90 max-w-2xl mb-10">
           No clutter, no confusion — just insights that save you hours.
         </p>
 
@@ -61,14 +63,6 @@ export default function Landing() {
             </Button>
           </Link>
           <Link to="/login">
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/40 text-white hover:bg-white/20 px-8 py-4 text-lg"
-            >
-              <BarChart3 className="w-5 h-5 mr-2" />
-              See Example
-            </Button>
           </Link>
         </div>
       </section>
@@ -148,6 +142,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="bg-gray-950 text-gray-400 py-10 text-center">
         <Mail className="w-6 h-6 mx-auto mb-2 text-indigo-400" />
+        <p className="text-sm"> Privacy Policies </p> 
         <p className="text-sm">© {new Date().getFullYear()} Resumail — All rights reserved.</p>
       </footer>
     </div>
