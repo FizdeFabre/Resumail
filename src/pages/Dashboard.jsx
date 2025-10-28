@@ -291,6 +291,21 @@ return (
       </div>
     </header>
 
+         <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 backdrop-blur border border-red/60 shadow-md">
+          <div className="p-6">
+            <h3 className="text-gray-900 font-semibold">Total d'emails analysés</h3>
+            <div className="text-4xl font-extrabold text-indigo-700 mt-2">
+                        <p className="text-white/80 text-sm">
+                  Resumail is actually in developpement, please, if have any question/suggestion or any bug to report,
+                </p>
+            </div>
+          
+                 <p className="text-white/80 text-sm">
+                  Contact *resumail.saas@gmail.com*, and I'll anwser you as quickly as I can
+                </p>
+          </div>
+        </div>
+
     {/* Body */}
     <main className="max-w-7xl mx-auto px-6 py-8">
       {/* Carte “verre” Connexion Gmail */}
