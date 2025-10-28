@@ -8,7 +8,7 @@
     import { supabase } from "../supabaseClient";
     import { Loader2 } from "lucide-react";
 
-    import { exportStyledPdf } from "../utils/pdfManager"; 
+import { exportStyledPdf } from "../utils/pdfManager"; 
 
   import { API_URL } from "@/lib/api"; // adapte le chemin selon ton projet
 

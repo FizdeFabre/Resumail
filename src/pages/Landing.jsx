@@ -1,7 +1,7 @@
 // src/pages/Landing.jsx
 import { Link } from "react-router-dom";
 import { Mail, Sparkles, BarChart3, Shield, Brain, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -24,7 +24,7 @@ export default function Landing() {
               </Button>
             </Link>
             <Link to="/signup">
-              <Button className="bg-white text-indigo-700 hover:bg-gray-100">
+              <Button variant="outline" className="bg-white text-indigo-700 hover:bg-gray-100">
                 Get Started
               </Button>
             </Link>
@@ -51,7 +51,8 @@ export default function Landing() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/signup">
-            <Button
+            <Button 
+            variant="outline"
               size="lg"
               className="bg-white text-indigo-700 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
             >
@@ -134,6 +135,7 @@ export default function Landing() {
         </p>
         <Link to="/signup">
           <Button
+          variant="outline"
             size="lg"
             className="bg-white text-indigo-700 hover:bg-gray-100 text-lg px-8 py-4 font-semibold"
           >
