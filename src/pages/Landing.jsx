@@ -93,7 +93,7 @@ export default function Landing() {
 
           <Card className="border-0 shadow-md hover:shadow-xl transition-shadow">
             <CardHeader className="text-center pb-6">
-              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-purple-600" />
               </div>
               <CardTitle>Private by Design</CardTitle>
@@ -107,7 +107,7 @@ export default function Landing() {
 
           <Card className="border-0 shadow-md hover:shadow-xl transition-shadow">
             <CardHeader className="text-center pb-6">
-              <div className="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-8 h-8 text-pink-600" />
               </div>
               <CardTitle>Instant Insights</CardTitle>

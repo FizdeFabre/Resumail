@@ -36,7 +36,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center px-6">
+    <div className="min-h-screen bg-indigo-700 flex items-center justify-center px-6">
       <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl w-full max-w-md p-8 border border-white/20">
         <div className="flex flex-col items-center text-center mb-8">
           <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
