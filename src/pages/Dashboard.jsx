@@ -265,7 +265,7 @@ if (!user)
 return (
   <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500">
     {/* Header sticky minimal */}
-    <header className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/20">
+    <header className="sticky top-0 z-30 bg-white/10 bg-indigo-500 border-b border-white/20">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-white">
