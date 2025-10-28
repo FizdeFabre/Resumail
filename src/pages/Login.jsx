@@ -1,65 +1,94 @@
-//Login.jsx
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
+import { Loader2, Mail } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-async function handleLogin(e) {
-  e.preventDefault();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  async function handleLogin(e) {
+    e.preventDefault();
+    setLoading(true);
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  const user = data.user;
-
-  if (user) {
-    // Vérifie ou crée profil
-    await supabase.from("profiles").upsert({
-      id: user.id,
-      email: user.email,
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
-  }
 
-  navigate("/dashboard");
-}
+    if (error) {
+      alert(error.message);
+      setLoading(false);
+      return;
+    }
+
+    const user = data.user;
+    if (user) {
+      await supabase.from("profiles").upsert({
+        id: user.id,
+        email: user.email,
+      });
+      navigate("/dashboard");
+    }
+    setLoading(false);
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded-xl shadow-md w-80">
-        <h2 className="text-xl font-bold mb-4">Connexion</h2>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border p-2 mb-3 rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2 mb-3 rounded"
-          required
-        />
-        <button type="submit" className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">
-          Se connecter
-        </button>
-        <p className="mt-4 text-sm text-center">
-          Pas encore de compte ? <Link to="/signup" className="text-indigo-600">Inscription</Link>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center px-6">
+      <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl w-full max-w-md p-8 border border-white/20">
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
+            <Mail className="text-white w-6 h-6" />
+          </div>
+          <h2 className="text-3xl font-bold text-white">Connexion</h2>
+          <p className="text-white/80 mt-2 text-sm">
+            Accède à ton tableau de bord Resumail.
+          </p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Adresse e-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 rounded-lg bg-white/80 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Mot de passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 rounded-lg bg-white/80 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            required
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-3 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
+              loading
+                ? "bg-white/30 cursor-not-allowed"
+                : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+            }`}
+          >
+            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : "Se connecter"}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-white/80 mt-6">
+          Pas encore de compte ?{" "}
+          <Link
+            to="/signup"
+            className="text-white underline decoration-white/50 hover:decoration-white"
+          >
+            Créer un compte
+          </Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
