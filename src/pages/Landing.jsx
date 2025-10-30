@@ -6,7 +6,7 @@
   import { Badge } from "@/components/ui/Badge";
   import { motion } from "framer-motion";
 
-  import Logo from "@/public/logo.png"
+  import Logo from "@/assets/logo.png"
 
   export default function Landing() {
     return (
