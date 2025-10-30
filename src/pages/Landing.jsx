@@ -1,23 +1,23 @@
-// src/pages/Landing.jsx
-import { Link } from "react-router-dom";
-import { Mail, Brain, ArrowRight, Shield, Sparkles, BarChart3 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import Logo from "@/public/logo.png"
+  // src/pages/Landing.jsx
+  import { Link } from "react-router-dom";
+  import { Mail, Brain, ArrowRight, Shield, Sparkles, BarChart3 } from "lucide-react";
+  import { Button } from "@/components/ui/Button";
+  import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/Card";
+  import { Badge } from "@/components/ui/Badge";
+  import { motion } from "framer-motion";
 
-export default function Landing() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white flex flex-col">
-      {/* === Navbar === */}
-      <nav className="bg-white/10 backdrop-blur-md sticky top-0 z-50 border-b border-white/20">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-                 <Image src={Logo} alt="Logo" width={32} height={32} />
-            </div>
+  import Logo from "@/public/logo.png"
+
+  export default function Landing() {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white flex flex-col">
+        {/* === Navbar === */}
+        <nav className="bg-white/10 backdrop-blur-md sticky top-0 z-50 border-b border-white/20">
+          <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
+     <img src={Logo} alt="Logo" width={32} height={32} className="rounded-lg" />
+              </div>
           //  <h1 className="text-xl font-bold tracking-tight">Resumail (A virer ssi image marche bien ). </h1>
           </div>
           <div className="flex items-center gap-4">
