@@ -504,22 +504,27 @@ function safeParseJson(str, fallbackTotal = 0) {
     const m = str.match(/\{[\s\S]*\}/m);
     if (!m) throw new Error("No JSON found");
     const parsed = JSON.parse(m[0]);
+
     if (!parsed.total_emails) parsed.total_emails = fallbackTotal;
-    if (!parsed.classification) parsed.classification = { positive:0, negative:0, neutral:0, other:0 };
+    if (!parsed.classification) parsed.classification = { positive: 0, negative: 0, neutral: 0, other: 0 };
     if (!parsed.highlights) parsed.highlights = [];
     if (!parsed.summary) parsed.summary = "";
+
+    // ✅ ICI : avant le return
+    parsed.sentiment_overall = parsed.classification;
+
     return parsed;
   } catch {
     return {
       total_emails: fallbackTotal,
-      
-      classification: { positive:0, negative:0, neutral:0, other:0 },
+      classification: { positive: 0, negative: 0, neutral: 0, other: 0 },
+      sentiment_overall: { positive: 0, negative: 0, neutral: 0, other: 0 }, // 👈 ajouté aussi ici
       highlights: [],
       summary: str.slice(0, 1000),
     };
   }
-  parsed.sentiment_overall = parsed.classification;
 }
+
 
 app.post("/analyzev2", async (req, res) => {
   try {
