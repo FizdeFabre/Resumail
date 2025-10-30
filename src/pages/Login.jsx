@@ -35,6 +35,8 @@ export default function Login() {
     setLoading(false);
   }
 
+  console.log("📊 Stats data:", stats);
+
 return (
   <div className="min-h-screen bg-indigo-700 flex items-center justify-center px-6">
     <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl w-full max-w-md p-8 border border-white/20">
