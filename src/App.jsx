@@ -9,6 +9,9 @@ import Filters from "./pages/Filters";
 import Billing from "./pages/Billing";
 import Dashboard from "./pages/Dashboard";
 import AnalyzePage from "./pages/analyze";
+import { CreditProvider } from "./pages/CreditContext"; // ✅ import nommé
+import Terms from "./pages/terms";
+import Privacy from "./pages/privacy";
 
 function AuthSuccess() {
   useEffect(() => {
@@ -22,8 +25,6 @@ function AuthSuccess() {
 
   return <p>Connexion Gmail réussie ! Redirection...</p>;
 }
-
-import { CreditProvider } from "./pages/CreditContext"; // ✅ import nommé
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -48,6 +49,8 @@ export default function App() {
         <Route path="/filters" element={<Filters session={session} />} />
         <Route path="/billing" element={<Billing session={session} />} />
         <Route path="/auth/success" element={<AuthSuccess />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
 
         {/* Protégé : accessible seulement si Gmail + Supabase */}
         <Route

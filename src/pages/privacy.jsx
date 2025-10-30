@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Terms() {
+export default function Privacy() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-6">
       <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg max-w-3xl w-full p-8">
