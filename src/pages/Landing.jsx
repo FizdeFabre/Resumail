@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function Landing() {
   return (
@@ -14,9 +15,9 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-              <Mail className="w-5 h-5 text-indigo-600" />
+                 <Image src={Logo} alt="Logo" width={32} height={32} />
             </div>
-            <h1 className="text-xl font-bold tracking-tight">Resumail</h1>
+          //  <h1 className="text-xl font-bold tracking-tight">Resumail (A virer ssi image marche bien ). </h1>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/login">
@@ -74,12 +75,6 @@ export default function Landing() {
               Try it Free
             </Button>
           </Link>
-          <a
-            href="#how-it-works"
-            className="px-8 py-4 text-lg border border-white/30 rounded-xl text-white/90 hover:bg-white/10 transition"
-          >
-            See how it works
-          </a>
         </div>
       </section>
 

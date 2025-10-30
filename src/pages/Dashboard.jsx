@@ -25,7 +25,7 @@ import {
   Legend,
 } from "recharts";
 
-const PIE_COLORS = ["#7C3AED", "#F472B6", "#EF4444"]; // violet, rose, red
+const PIE_COLORS = ["#7C3AED","#EF4444", "#F472B6",  "#7E9444"]; 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 export default function Dashboard() {
@@ -365,33 +365,40 @@ return (
         </div>
 
         {/* Pie Chart */}
-        <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
-          <div className="p-6">
-            <h3 className="text-gray-900 font-semibold">Sentiment Distribution</h3>
-            <div style={{ height: 220 }} className="mt-3">
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={48}
-                    outerRadius={82}
-                    paddingAngle={4}
-                  >
-                    {pieData.map((entry, idx) => (
-                      <Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => `${v}`} />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+      <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+  <div className="p-6">
+    <h3 className="text-gray-900 font-semibold">Sentiment Distribution</h3>
+    {pieData.every(d => d.value === 0) ? (
+      <p className="text-gray-500 text-sm mt-3 italic">
+        No sentiment data available yet.
+      </p>
+    ) : (
+      <div style={{ height: 220 }} className="mt-3">
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={pieData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              innerRadius={48}
+              outerRadius={82}
+              paddingAngle={4}
+            >
+              {pieData.map((entry, idx) => (
+                <Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(v) => `${v}`} />
+            <Legend verticalAlign="bottom" height={36} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    )}
+  </div>
+</div>
+
 
         {/* Line Chart */}
         <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">

@@ -9,7 +9,7 @@ import Filters from "./pages/Filters";
 import Billing from "./pages/Billing";
 import Dashboard from "./pages/Dashboard";
 import AnalyzePage from "./pages/analyze";
-import { CreditProvider } from "./pages/CreditContext"; // ✅ import nommé
+import { CreditProvider } from "./pages/CreditContext"; 
 import Terms from "./pages/terms";
 import Privacy from "./pages/privacy";
 
@@ -18,12 +18,12 @@ function AuthSuccess() {
     const params = new URLSearchParams(window.location.search);
     const gmail = params.get("user") || params.get("gmail_user");
     if (gmail) {
-      localStorage.setItem("gmailUser", gmail); // 🔥 clé cohérente avec Dashboard.jsx
-      window.location.href = "/dashboard"; // retour forcé Dashboard
+      localStorage.setItem("gmailUser", gmail); 
+      window.location.href = "/dashboard"; 
     }
   }, []);
 
-  return <p>Connexion Gmail réussie ! Redirection...</p>;
+  return <p> Login Success !</p>;
 }
 
 export default function App() {
