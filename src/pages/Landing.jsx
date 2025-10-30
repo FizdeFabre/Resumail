@@ -6,6 +6,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Logo from "@/public/logo.png"
 
 export default function Landing() {
   return (
