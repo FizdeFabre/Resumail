@@ -72,7 +72,7 @@ return (
           className={`w-full py-3 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
             loading
               ? "bg-white/30 cursor-not-allowed"
-              : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+              : "bg-blue-900 hover:opacity-90"
           }`}
         >
           {loading ? <Loader2 className="animate-spin w-5 h-5" /> : "Log in"}

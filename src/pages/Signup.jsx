@@ -82,7 +82,7 @@ return (
           className={`w-full py-3 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
             loading
               ? "bg-white/30 cursor-not-allowed"
-              : "bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90"
+              : "bg-blue-900 hover:opacity-90"
           }`}
         >
           {loading ? (
