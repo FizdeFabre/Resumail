@@ -1,9 +1,9 @@
 // src/pages/Landing.jsx
 import { Link } from "react-router-dom";
 import { Mail, Brain, ArrowRight, Shield, Sparkles, BarChart3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { motion } from "framer-motion";
 
 export default function Landing() {
