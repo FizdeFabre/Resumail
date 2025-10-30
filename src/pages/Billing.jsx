@@ -7,7 +7,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
 
 export default function Billing() {
   const [userId, setUserId] = useState(null);
-  const [loadingId, setLoadingId] = useState(null); // id du plan en cours
+  const [loadingId, setLoadingId] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function Billing() {
 
   async function handleCheckout(planKey, credits) {
     if (!userId) {
-      setError("Aucun utilisateur connecté !");
+      setError("No user connected!");
       return;
     }
     setError("");
@@ -32,22 +32,21 @@ export default function Billing() {
         body: JSON.stringify({ userId, credits }),
       });
 
-      if (!res.ok) throw new Error("Erreur serveur Stripe");
+      if (!res.ok) throw new Error("Stripe server error");
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        throw new Error("Aucune URL Stripe retournée");
+        throw new Error("No Stripe URL returned");
       }
     } catch (err) {
       console.error(err);
-      setError("Impossible de lancer le paiement. Réessaie plus tard.");
+      setError("Unable to start checkout. Please try again later.");
     } finally {
       setLoadingId(null);
     }
   }
 
-  // ⚠️ Classes Tailwind statiques (pas de bg-${color}-600 & co)
   const ACCENT = {
     text: "text-indigo-600",
     border: "border-indigo-500",
@@ -64,11 +63,8 @@ export default function Billing() {
       name: "Starter",
       credits: 100,
       price: 5,
-      tagline: "Idéal pour tester",
-      perks: [
-        "Bon rapport quantité/prix",
-        "0,05 € / email",
-      ],
+      tagline: "Perfect to get started",
+      perks: ["Great value for small usage", "€0.05 / email"],
       featured: false,
     },
     {
@@ -76,23 +72,17 @@ export default function Billing() {
       name: "Pro",
       credits: 500,
       price: 20,
-      tagline: "Parfait pour un usage régulier",
-      perks: [
-        "Plusieurs centaines de retours clients",
-        "0,04 € / email",
-      ],
-      featured: true, // ⭐ le plan mis en avant
+      tagline: "For regular users",
+      perks: ["Ideal for customer analysis", "€0.04 / email"],
+      featured: true,
     },
     {
       key: "master",
       name: "Master",
       credits: 2000,
       price: 70,
-      tagline: "Pour les gros volumes",
-      perks: [
-        "Des milliers d’emails en < 5 minutes",
-        "Meilleur prix: ~0,035 € / email",
-      ],
+      tagline: "High-volume plan",
+      perks: ["Thousands of emails in under 5 minutes", "Best deal: ~€0.035 / email"],
       featured: false,
     },
   ];
@@ -100,21 +90,21 @@ export default function Billing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-5xl">
-        {/* En-tête */}
+        {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/90 text-sm mb-4 backdrop-blur">
             <Sparkles className="w-4 h-4" />
-            Recharge de crédits
+            Credit Recharge
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Booste tes analyses Resumail ⚡
+            Boost your Resumail analysis ⚡
           </h1>
           <p className="text-white/80 mt-2">
-            Choisis un pack adapté à ton usage. Tu peux upgrader à tout moment.
+            Choose a plan that fits your usage. You can upgrade anytime.
           </p>
         </div>
 
-        {/* Conteneur “verre” */}
+        {/* Glass container */}
         <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 md:p-8 shadow-2xl">
           {error && (
             <p className="text-red-700 bg-red-50 border border-red-200 px-4 py-2 rounded-lg text-center mb-6">
@@ -122,7 +112,6 @@ export default function Billing() {
             </p>
           )}
 
-          {/* Grille de plans */}
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((p) => (
               <div
@@ -132,10 +121,9 @@ export default function Billing() {
                   p.featured ? "border-indigo-300 shadow-indigo-100" : "border-gray-200 hover:shadow-md",
                 ].join(" ")}
               >
-                {/* Badge “Populaire” */}
                 {p.featured && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-3 py-1 rounded-full bg-indigo-600 text-white shadow-md">
-                    Populaire
+                    Popular
                   </div>
                 )}
 
@@ -145,7 +133,7 @@ export default function Billing() {
 
                   <div className="mt-4 mb-4">
                     <span className="text-3xl font-bold text-gray-900">{p.price} €</span>
-                    <span className="text-sm text-gray-500"> / {p.credits} crédits</span>
+                    <span className="text-sm text-gray-500"> / {p.credits} credits</span>
                   </div>
 
                   <ul className="text-gray-700 text-sm space-y-2 mb-6">
@@ -168,19 +156,19 @@ export default function Billing() {
                     ].join(" ")}
                   >
                     {loadingId === p.key && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Acheter
+                    Purchase
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Petite mention de confiance */}
           <div className="text-center text-white/80 text-xs mt-6">
-            Paiement sécurisé par Stripe. Les crédits s’appliquent immédiatement après l’achat.
+            Secure payments powered by Stripe. Credits are applied instantly after purchase.
           </div>
         </div>
       </div>
     </div>
   );
 }
+

@@ -152,7 +152,7 @@ import { exportStyledPdf } from "../utils/pdfManager";
   } catch (err) {
     console.error("Fetch emails failed:", err);
     setError(
-      "Impossible de récupérer les emails. Vérifie ton backend et la connexion de l'utilisateur."
+      " Email fetching impossible "
     );
   } finally {
     setLoading(false);
@@ -202,11 +202,11 @@ async function analyzeSelection() {
   setAnalyzing(true);
   try {
     const userId = await getUserId();
-    if (!userId) throw new Error("Utilisateur non connecté (Supabase)");
+    if (!userId) throw new Error("No user connected");
 
     const selectedEmails = emailsShown.filter((e) => selectedMap[e.id]);
     if (!selectedEmails.length) {
-      alert("Aucun email sélectionné");
+      alert("No email adress connected");
       return;
     }
 
@@ -214,7 +214,7 @@ async function analyzeSelection() {
     const needed = selectedEmails.length * CREDITS_PER_EMAIL;
     const creditsAvailable = serverCredits ?? creditsLeft ?? 0;
     if (creditsAvailable < needed) {
-      alert(`Pas assez de crédits (${creditsAvailable} disponibles, ${needed} nécessaires).`);
+      alert(`Not enough credits : (${creditsAvailable} available, ${needed} needed).`);
       return;
     }
 
@@ -233,10 +233,10 @@ async function analyzeSelection() {
     } else {
       const txt = await res.text();
       console.error("[analyzeSelection] /analyzev2 returned non-JSON:", txt.slice(0, 400));
-      throw new Error("Le serveur a renvoyé du HTML au lieu du JSON (probablement une erreur backend).");
+      throw new Error("HTML detected, backend error).");
     }
 
-    if (!res.ok) throw new Error(data?.error || "Analyse échouée");
+    if (!res.ok) throw new Error(data?.error || "Failed analyze");
 
     const final = data.finalReport || {};
     const finalId = data.finalReportId || data.final_report_id || null;
@@ -257,7 +257,7 @@ async function analyzeSelection() {
   const query = ids.map(encodeURIComponent).join(',');
   console.log("➡️ URL finale:", `${API_URL}/reports?ids=${query}`);
   const res = await fetch(`${API_URL}/reports/byIds?ids=${query}`); 
-  if (!res.ok) throw new Error(`Erreur ${res.status} en récupérant les mini-rapports`);
+  if (!res.ok) throw new Error(`Error ${res.status} while fetching min-reports`);
   return await res.json();
 };
 
@@ -286,7 +286,7 @@ async function analyzeSelection() {
     setSelectedMap({});
   } catch (err) {
     console.error("Analyse error:", err);
-    alert(err.message || "Erreur pendant l’analyse (voir console)");
+    alert(err.message || "Error during analyze");
   } finally {
     setAnalyzing(false);
   }
@@ -296,7 +296,7 @@ async function analyzeSelection() {
       const handlePrintReport = () => {
         if (!report) return;
 
-        const title = "Resumail — Rapport";
+        const title = "Resumail — Report";
         const dateStr = new Date().toLocaleString();
         const userStr = gmailUser || "—";
         const summary = (report.report_text || report.summary || "").replace(/\n/g, "<br/>");
@@ -309,7 +309,7 @@ async function analyzeSelection() {
                   : `<div class="highlight-item">${escapeHtml(h.text || JSON.stringify(h))} <span class="meta">(${h.count ?? ""} — ${h.pct ?? ""})</span></div>`
               )
               .join("")
-          : `<p class="muted">Aucun point marquant détecté.</p>`;
+          : `<p class="muted">No major pinpoints detected.</p>`;
 
         const positive = report.classification?.positive ?? 0;
         const negative = report.classification?.negative ?? 0;
@@ -345,18 +345,18 @@ async function analyzeSelection() {
           <body>
             <div class="container">
               <header>
-                <h1>📊 Rapport Resumail</h1>
+                <h1> Resumail Report </h1>
                 <div class="subtitle">${escapeHtml(userStr)} — ${escapeHtml(dateStr)}</div>
               </header>
 
               <div class="card">
                 <h2>📝 Résumé</h2>
-                <div class="summary"><p>${summary || "<span class='muted'>Aucun résumé disponible.</span>"}</p></div>
+                <div class="summary"><p>${summary || "<span class='muted'>No summary detected.</span>"}</p></div>
               </div>
 
               <div class="card">
-                <h2>📈 Statistiques</h2>
-                <p>Total emails analysés : <strong>${escapeHtml(String(total))}</strong></p>
+                <h2>📈 Statistics </h2>
+                <p> Email analyzed : <strong>${escapeHtml(String(total))}</strong></p>
                 <div class="grid">
                   <div class="stat"><div class="value">${escapeHtml(String(positive))}</div><div>Positifs</div></div>
                   <div class="stat"><div class="value">${escapeHtml(String(negative))}</div><div>Négatifs</div></div>
@@ -366,11 +366,11 @@ async function analyzeSelection() {
               </div>
 
               <div class="card">
-                <h2>✨ Points récurrents</h2>
+                <h2>✨ Highlights </h2>
                 ${highlightsHtml}
               </div>
 
-              <footer>Rapport généré automatiquement par Resumail — ${escapeHtml(dateStr)}</footer>
+              <footer>Report generated by Resumail — ${escapeHtml(dateStr)}</footer>
             </div>
           </body>
           </html>
@@ -378,7 +378,7 @@ async function analyzeSelection() {
 
         const w = window.open("", "_blank");
         if (!w) {
-          alert("Impossible d'ouvrir une fenêtre d'impression (bloqueur de pop-up ?).");
+          alert("Error");
           return;
         }
         w.document.write(html);
@@ -448,7 +448,7 @@ return (
     <header className="sticky top-0 z-30 bg-white/10 backdrop-blur-md border-b border-white/20">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <h1 className="text-xl md:text-2xl font-bold text-white">
-          Filtres — <span className="text-white/80">{gmailUser}</span>
+          Filters — <span className="text-white/80">{gmailUser}</span>
         </h1>
         <div className="flex items-center gap-3">
           <div className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm">
@@ -458,7 +458,7 @@ return (
             onClick={() => navigate("/billing")}
             className="bg-white text-indigo-700 hover:bg-gray-100"
           >
-            Acheter des crédits
+           Buy Credits
           </Button>
         </div>
       </div>
@@ -470,7 +470,7 @@ return (
         <div className="p-6 md:p-8">
           <h2 className="text-white text-lg font-semibold">📥 Charger la boîte Gmail</h2>
           <p className="text-white/80 text-sm mt-1">
-            Récupère les {maxToFetch} derniers emails reçus depuis ta boîte connectée.
+           Fetching the {maxToFetch} last emails from the email adress ( Beta limit )
           </p>
           <div className="mt-4">
             <Button
@@ -483,7 +483,7 @@ return (
                   <Loader2 className="animate-spin mr-2 h-4 w-4" /> Chargement…
                 </>
               ) : (
-                "Charger ma boîte"
+                "Loading ..."
               )}
             </Button>
             {error && <p className="text-red-200 text-sm mt-3">{error}</p>}
@@ -494,14 +494,14 @@ return (
       {/* Paramètres de filtrage */}
       <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
         <div className="p-6 md:p-8">
-          <h2 className="text-gray-900 text-lg font-semibold">⚙️ Paramètres de filtrage</h2>
+          <h2 className="text-gray-900 text-lg font-semibold">⚙️ Filter parameters </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             {/* Expéditeurs */}
             <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <h3 className="text-indigo-700 font-semibold mb-1">Filtrage des expéditeurs</h3>
+              <h3 className="text-indigo-700 font-semibold mb-1"> Senders filter </h3>
               <p className="text-gray-500 text-sm mb-3">
-                Liste d’expéditeurs à ignorer (séparés par des virgules).
+                List of senders to ignore ( separated by commas , ).
               </p>
               <Input
                 placeholder="Ex: pub@, noreply@, newsletter@..."
@@ -513,10 +513,10 @@ return (
 
             {/* Mots-clés */}
             <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <h3 className="text-indigo-700 font-semibold mb-1">Filtrage par mots-clés</h3>
-              <p className="text-gray-500 text-sm mb-3">Mots-clés à ignorer dans le contenu ou le sujet.</p>
+              <h3 className="text-indigo-700 font-semibold mb-1">Keywords filter</h3>
+              <p className="text-gray-500 text-sm mb-3">Keywords to ignore ( separated by commas , ). </p>
               <Input
-                placeholder="Ex: promo, urgent, vente..."
+                placeholder="Ex: ads, spams, ... "
                 value={filters.ignoreKeywords}
                 onChange={(e) => setFilters({ ...filters, ignoreKeywords: e.target.value })}
                 className="bg-white"
@@ -525,8 +525,8 @@ return (
 
             {/* Dates */}
             <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <h3 className="text-indigo-700 font-semibold mb-1">Filtrage par date</h3>
-              <p className="text-gray-500 text-sm mb-3">Choisis la période à analyser.</p>
+              <h3 className="text-indigo-700 font-semibold mb-1"> Date filter</h3>
+              <p className="text-gray-500 text-sm mb-3"> Fetching emails between the dates</p>
               <div className="flex gap-2">
                 <Input
                   type="date"
@@ -545,8 +545,8 @@ return (
 
             {/* Taille */}
             <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <h3 className="text-indigo-700 font-semibold mb-1">Taille du message</h3>
-              <p className="text-gray-500 text-sm mb-3">Filtrer selon le nombre de mots du contenu.</p>
+              <h3 className="text-indigo-700 font-semibold mb-1"> Email size</h3>
+              <p className="text-gray-500 text-sm mb-3"> Filter emails if they don't contain enough words, or too much</p>
               <div className="flex gap-2">
                 <Input
                   type="number"
@@ -568,17 +568,17 @@ return (
 
           <div className="flex flex-wrap gap-3 pt-4">
             <Button onClick={applyFilters} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-              Appliquer
+              Apply filters ( Fetch emails first /!\ )
             </Button>
             <Button variant="outline" onClick={resetDisplayedFilters} className="border-gray-300 text-gray-700">
-              Réinitialiser
+              Reset filters
             </Button>
             <Button
               variant="secondary"
               onClick={clearAllFiltersInputs}
               className="bg-gray-100 text-gray-700 hover:bg-gray-200"
             >
-              Vider
+              Empty filters parameters
             </Button>
           </div>
         </div>
@@ -589,21 +589,21 @@ return (
         <div className="p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
             <h2 className="text-gray-900 font-semibold">
-              📑 Résultats ({emailsShown.length} affichés / {emailsOriginal.length} récupérés)
+              Results : ({emailsShown.length} Showed / {emailsOriginal.length} Fetched)
             </h2>
             <div className="flex flex-wrap gap-2">
               <Button onClick={selectAllShown} className="bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50">
-                Tout sélectionner
+              Select all
               </Button>
               <Button onClick={deselectAll} variant="outline" className="border-gray-300 text-gray-700">
-                Tout désélectionner
+                Deselect all
               </Button>
               <Button
                 onClick={analyzeSelection}
                 disabled={analyzing}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white"
               >
-                {analyzing ? "⚡ Analyse en cours…" : "🤖 Analyser la sélection"}
+                {analyzing ? "⚡Waiting for results …" : "Analyze selection ( AI analyze ) "}
               </Button>
             </div>
           </div>
@@ -644,13 +644,13 @@ return (
         <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
           <div className="p-6 md:p-8 space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">📊 Rapport IA</h3>
-              <p className="text-sm text-gray-500">Résumé et indicateurs clés</p>
+              <h3 className="text-lg font-semibold text-gray-900">AI Report </h3>
+              <p className="text-sm text-gray-500">Summary and Highlights</p>
             </div>
 
             {/* Résumé */}
             <section className="bg-white p-4 rounded-xl border border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">📝 Résumé</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">📝 Summary </h4>
               <p className="text-gray-700 whitespace-pre-wrap">
                 {report.report_text || report.summary || "—"}
               </p>
@@ -658,7 +658,7 @@ return (
 
             {/* Stats */}
             <section className="bg-white p-4 rounded-xl border border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-3">📈 Statistiques générales</h4>
+              <h4 className="font-semibold text-gray-900 mb-3">📈 General Statistics </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 <div className="bg-indigo-50 p-3 rounded-lg text-center border border-indigo-100">
                   <span className="block font-bold text-xl text-indigo-700">{report.total_emails ?? 0}</span>
@@ -666,26 +666,26 @@ return (
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg text-center border border-green-100">
                   <span className="block font-bold text-xl text-green-700">{report.classification?.positive ?? 0}</span>
-                  <span className="text-gray-700">Positifs</span>
+                  <span className="text-gray-700">Positive</span>
                 </div>
                 <div className="bg-yellow-50 p-3 rounded-lg text-center border border-yellow-100">
                   <span className="block font-bold text-xl text-yellow-700">{report.classification?.neutral ?? 0}</span>
-                  <span className="text-gray-700">Neutres</span>
+                  <span className="text-gray-700">Neutral</span>
                 </div>
                 <div className="bg-red-50 p-3 rounded-lg text-center border border-red-100">
                   <span className="block font-bold text-xl text-red-700">{report.classification?.negative ?? 0}</span>
-                  <span className="text-gray-700">Négatifs</span>
+                  <span className="text-gray-700">Negative </span>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg text-center border border-gray-200">
                   <span className="block font-bold text-xl text-gray-800">{report.classification?.other ?? 0}</span>
-                  <span className="text-gray-700">Autres</span>
+                  <span className="text-gray-700">Other/Undefined</span>
                 </div>
               </div>
             </section>
 
             {/* Points récurrents */}
             <section className="bg-white p-4 rounded-xl border border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">💡 Points récurrents</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">💡Highlights </h4>
               <ul className="list-disc list-inside text-gray-700 space-y-1">
                 {(report.highlights || []).length ? (
                   report.highlights.map((h, i) =>
@@ -698,7 +698,7 @@ return (
                     )
                   )
                 ) : (
-                  <li className="text-gray-500">Aucun point marquant détecté.</li>
+                  <li className="text-gray-500">No hightlights detected </li>
                 )}
               </ul>
             </section>
@@ -709,7 +709,7 @@ return (
                 onClick={() => exportStyledPdf(report, gmailUser)}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg px-4 py-2"
               >
-                💾 Télécharger PDF
+                💾 Download PDF
               </Button>
             </div>
           </div>

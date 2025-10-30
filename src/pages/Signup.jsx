@@ -39,70 +39,71 @@ export default function Signup() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-indigo-700 flex items-center justify-center px-6">
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl w-full max-w-md p-8 border border-white/20">
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
-            <Sparkles className="text-white w-6 h-6" />
-          </div>
-          <h2 className="text-3xl font-bold text-white">Créer un compte</h2>
-          <p className="text-white/80 mt-2 text-sm">
-            Rejoins Resumail et analyse ta boîte mail avec l’IA.
-          </p>
+return (
+  <div className="min-h-screen bg-indigo-700 flex items-center justify-center px-6">
+    <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl w-full max-w-md p-8 border border-white/20">
+      <div className="flex flex-col items-center text-center mb-8">
+        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
+          <Sparkles className="text-white w-6 h-6" />
         </div>
-
-        <form onSubmit={handleSignup} className="space-y-4">
-          {errorMessage && (
-            <div className="p-3 bg-red-100/90 text-red-800 rounded-lg text-sm text-center">
-              {errorMessage}
-            </div>
-          )}
-
-          <input
-            type="email"
-            placeholder="Adresse e-mail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 rounded-lg bg-white/80 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 rounded-lg bg-white/80 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            required
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
-              loading
-                ? "bg-white/30 cursor-not-allowed"
-                : "bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90"
-            }`}
-          >
-            {loading ? (
-              <Loader2 className="animate-spin w-5 h-5" />
-            ) : (
-              "Créer un compte"
-            )}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-white/80 mt-6">
-          Déjà un compte ?{" "}
-          <Link
-            to="/login"
-            className="text-white underline decoration-white/50 hover:decoration-white"
-          >
-            Connexion
-          </Link>
+        <h2 className="text-3xl font-bold text-white">Create an account</h2>
+        <p className="text-white/80 mt-2 text-sm">
+          Join Resumail and analyze your inbox with AI.
         </p>
       </div>
+
+      <form onSubmit={handleSignup} className="space-y-4">
+        {errorMessage && (
+          <div className="p-3 bg-red-100/90 text-red-800 rounded-lg text-sm text-center">
+            {errorMessage}
+          </div>
+        )}
+
+        <input
+          type="email"
+          placeholder="Email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 rounded-lg bg-white/80 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-3 rounded-lg bg-white/80 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          required
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-3 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
+            loading
+              ? "bg-white/30 cursor-not-allowed"
+              : "bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90"
+          }`}
+        >
+          {loading ? (
+            <Loader2 className="animate-spin w-5 h-5" />
+          ) : (
+            "Sign up"
+          )}
+        </button>
+      </form>
+
+      <p className="text-center text-sm text-white/80 mt-6">
+        Already have an account?{" "}
+        <Link
+          to="/login"
+          className="text-white underline decoration-white/50 hover:decoration-white"
+        >
+          Log in
+        </Link>
+      </p>
     </div>
-  );
+  </div>
+);
+
 }

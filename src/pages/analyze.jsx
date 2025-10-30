@@ -41,7 +41,7 @@ export default function Analyse() {
   body: JSON.stringify({ userId, emails: batch }),
 });
         const data = await res.json()
-        newReports.push(data.report || `Batch ${i + 1}: aucun résultat`)
+        newReports.push(data.report || `Batch ${i + 1}: No results`)
       }
 
       setReports(newReports)
@@ -62,14 +62,14 @@ export default function Analyse() {
   }
 
   if (!emails.length) {
-    return <p className="p-6">⚠️ Aucun email reçu depuis Filters.jsx</p>
+    return <p className="p-6">⚠️ No email fetched from Filters.jsx</p>
   }
 
   return (
     <div className="p-6 max-w-5xl mx-auto font-sans">
-      <h1 className="text-2xl font-bold mb-4">Analyse IA</h1>
+      <h1 className="text-2xl font-bold mb-4">AI analyze </h1>
       <p className="mb-4 text-gray-600">
-        {emails.length} emails sélectionnés, regroupés en {batches.length} batchs.
+        {emails.length}emails regrouped in {batches.length} batchs.
       </p>
 
       <Button onClick={analyzeBatches} disabled={loading}>
@@ -79,7 +79,7 @@ export default function Analyse() {
       {/* Résultats batchs */}
       {reports.length > 0 && (
         <div className="mt-6 space-y-4">
-          <h2 className="text-xl font-semibold">Résultats par batch</h2>
+          <h2 className="text-xl font-semibold">Results </h2>
           {reports.map((r, i) => (
             <div key={i} className="p-3 border rounded bg-gray-50">
               <strong>Batch {i + 1} :</strong>
@@ -92,7 +92,7 @@ export default function Analyse() {
       {/* Rapport final */}
       {finalReport && (
         <div className="mt-8 p-4 border rounded bg-green-50">
-          <h2 className="text-xl font-bold mb-2">Rapport final consolidé</h2>
+          <h2 className="text-xl font-bold mb-2">Final Report</h2>
           <pre className="whitespace-pre-wrap">{finalReport}</pre>
         </div>
       )}

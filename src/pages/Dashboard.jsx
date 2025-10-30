@@ -228,9 +228,9 @@ const downloadReportPdf = async (report) => {
 
   // small derived data for charts
   const pieData = [
-    { name: "Positifs", value: stats?.avg?.positive ?? 0 },
-    { name: "Neutres", value: stats?.avg?.neutral ?? 0 },
-    { name: "Négatifs", value: stats?.avg?.negative ?? 0 },
+    { name: "Positive", value: stats?.avg?.positive ?? 0 },
+    { name: "Neutral", value: stats?.avg?.neutral ?? 0 },
+    { name: "Negative", value: stats?.avg?.negative ?? 0 },
     { name: "Other", value: stats?.avg?.other ?? 0 },
   ];
 
@@ -240,7 +240,7 @@ const downloadReportPdf = async (report) => {
 if (loading)
   return (
     <div className="p-6 text-center text-gray-500 animate-pulse">
-      Chargement des données…
+      Loading data ... 
     </div>
   );
 
@@ -248,15 +248,15 @@ if (!user)
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
       <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl text-center shadow-lg border border-white/20">
-        <h2 className="text-2xl font-semibold text-white mb-4">Connexion requise</h2>
+        <h2 className="text-2xl font-semibold text-white mb-4">Login requiered </h2>
         <p className="text-white/80 mb-6">
-          Connecte-toi avec Resumail pour accéder à ton tableau de bord.
+          Login with Resumail
         </p>
         <Button
           onClick={() => navigate("/login")}
           className="bg-white text-indigo-700 hover:bg-gray-100"
         >
-          Se connecter
+         Login
         </Button>
       </div>
     </div>
@@ -264,51 +264,50 @@ if (!user)
 
 return (
   <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500">
-    {/* Header sticky minimal */}
+    {/* Header */}
     <header className="sticky top-0 z-30 bg-white/10 bg-indigo-500 border-b border-white/20">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-white">
-            Bienvenue, <span className="text-white/80">{user.email}</span>
+            Welcome, <span className="text-white/80">{user.email}</span>
           </h1>
-          <p className="text-white/70 text-sm">Résumé & historique — Resumail</p>
+          <p className="text-white/70 text-sm">Summary & history — Resumail</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm">
-            Crédits&nbsp;: <span className="font-semibold">{Number(localCredits ?? credits ?? 0)}</span>
+            Credits:&nbsp; <span className="font-semibold">{Number(localCredits ?? credits ?? 0)}</span>
           </div>
           <Button
             variant="outline"
             onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
             className="bg-white/10 hover:bg-white/20 text-white border-white/30"
           >
-            Déconnexion
+            Logout
           </Button>
           <Button onClick={() => navigate("/billing")} className="bg-white text-indigo-700 hover:bg-gray-100">
-            Recharge
+            Add credits
           </Button>
         </div>
       </div>
     </header>
 
-         <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 backdrop-blur border border-red/60 shadow-md">
-          <div className="p-6">
-            <h3 className="text-gray-900 font-semibold">Total d'emails analysés</h3>
-            <div className="text-4xl font-extrabold text-indigo-700 mt-2">
-                        <p className="text-white/80 text-sm">
-                  Resumail is actually in developpement, please, if have any question/suggestion or any bug to report,
-                </p>
-            </div>
-          
-                 <p className="text-white/80 text-sm">
-                  Contact *resumail.saas@gmail.com*, and I'll anwser you as quickly as I can
-                </p>
-          </div>
-        </div>
+    {/* Banner / Dev message */}
+    <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 backdrop-blur border border-red/60 shadow-md mt-6 mx-6">
+      <div className="p-6">
+        <h3 className="text-white font-semibold text-lg">Heads up!</h3>
+        <p className="text-white/80 text-sm mt-2">
+          Resumail is still under development — if you encounter any bug or have a suggestion, feel free to reach out:
+        </p>
+        <p className="text-white font-semibold mt-2">
+          📧 resumail.saas@gmail.com
+        </p>
+      </div>
+    </div>
 
     {/* Body */}
     <main className="max-w-7xl mx-auto px-6 py-8">
-      {/* Carte “verre” Connexion Gmail */}
+
+      {/* Gmail connection card */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -319,9 +318,9 @@ return (
           <div className="p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h2 className="text-white text-lg font-semibold">Connexion Gmail</h2>
+                <h2 className="text-white text-lg font-semibold">Gmail Connection</h2>
                 <p className="text-white/80 text-sm">
-                  Connecte ta boîte Gmail pour activer les filtres et générer des rapports.
+                  Connect your Gmail account to enable filters and generate reports.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -329,14 +328,14 @@ return (
                   onClick={() => (window.location.href = `${API_BASE}/auth/google`)}
                   className="bg-white text-indigo-700 hover:bg-gray-100"
                 >
-                  Connecter une adresse Gmail
+                  Connect Gmail
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => navigate("/filters")}
                   className="bg-white/10 hover:bg-white/20 text-white border-white/30"
                 >
-                  Aller aux filtres
+                  Go to Filters
                 </Button>
               </div>
             </div>
@@ -351,24 +350,24 @@ return (
         transition={{ duration: 0.25 }}
         className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"
       >
-        {/* Total emails + dernier résumé */}
+        {/* Total emails */}
         <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
           <div className="p-6">
-            <h3 className="text-gray-900 font-semibold">Total d'emails analysés</h3>
+            <h3 className="text-gray-900 font-semibold">Total Emails Analyzed</h3>
             <div className="text-4xl font-extrabold text-indigo-700 mt-2">
               {stats?.total_emails ?? 0}
             </div>
-            <p className="text-gray-500 text-sm mt-4">Dernier résumé :</p>
+            <p className="text-gray-500 text-sm mt-4">Last summary:</p>
             <p className="text-gray-800 text-sm mt-1 line-clamp-4 break-words">
               {stats?.last_summary ?? "—"}
             </p>
           </div>
         </div>
 
-        {/* Pie */}
+        {/* Pie Chart */}
         <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
           <div className="p-6">
-            <h3 className="text-gray-900 font-semibold">Répartition des sentiments</h3>
+            <h3 className="text-gray-900 font-semibold">Sentiment Distribution</h3>
             <div style={{ height: 220 }} className="mt-3">
               <ResponsiveContainer>
                 <PieChart>
@@ -394,10 +393,10 @@ return (
           </div>
         </div>
 
-        {/* Line */}
+        {/* Line Chart */}
         <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
           <div className="p-6">
-            <h3 className="text-gray-900 font-semibold">Tendance — Emails traités</h3>
+            <h3 className="text-gray-900 font-semibold">Trend — Processed Emails</h3>
             <div style={{ height: 220 }} className="mt-3">
               <ResponsiveContainer>
                 <LineChart data={lineData}>
@@ -414,17 +413,17 @@ return (
         </div>
       </motion.div>
 
-      {/* Historique */}
+      {/* Reports history */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
           <div className="p-6 md:p-8">
             <div className="mb-4">
-              <h3 className="text-lg font-bold text-gray-900">Historique des rapports finaux</h3>
-              <p className="text-sm text-gray-500">Consulte et télécharge tes analyses complètes.</p>
+              <h3 className="text-lg font-bold text-gray-900">Final Reports History</h3>
+              <p className="text-sm text-gray-500">View and download your complete analyses.</p>
             </div>
 
             {history.filter((r) => r.is_final).length === 0 ? (
-              <p className="text-gray-500 italic text-sm">Aucun rapport final enregistré pour l’instant.</p>
+              <p className="text-gray-500 italic text-sm">No final report available yet.</p>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-gray-200">
                 <table className="min-w-full text-sm">
@@ -432,7 +431,7 @@ return (
                     <tr>
                       <th className="px-4 py-2 text-left font-semibold text-gray-600">Date</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-600">Emails</th>
-                      <th className="px-4 py-2 text-left font-semibold text-gray-600">Résumé</th>
+                      <th className="px-4 py-2 text-left font-semibold text-gray-600">Summary</th>
                       <th className="px-4 py-2 text-left font-semibold text-gray-600">Actions</th>
                     </tr>
                   </thead>
@@ -443,7 +442,7 @@ return (
                       .map((r) => (
                         <tr key={r.id} className="hover:bg-gray-50/70">
                           <td className="px-4 py-2 text-gray-700">
-                            {new Date(r.created_at).toLocaleString("fr-FR", {
+                            {new Date(r.created_at).toLocaleString("en-US", {
                               day: "2-digit",
                               month: "short",
                               year: "numeric",
@@ -460,7 +459,7 @@ return (
                               className="bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50"
                               onClick={() => downloadReportPdf(r)}
                             >
-                              Télécharger PDF
+                              Download PDF
                             </Button>
                           </td>
                         </tr>
@@ -473,17 +472,18 @@ return (
         </div>
       </motion.div>
 
-      {/* CTA crédits */}
+      {/* Credit Booster CTA */}
       <div className="mt-8 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-6 flex flex-col md:flex-row items-center justify-between gap-4 text-white shadow-2xl">
         <div>
-          <h4 className="text-lg font-semibold">Booster de crédits</h4>
+          <h4 className="text-lg font-semibold">Credit Booster</h4>
           <p className="text-white/80 text-sm mt-1">
-            Il te reste <span className="font-semibold">{Number(localCredits ?? credits ?? 0)}</span> crédits. Recharge pour analyser plus d’emails.
+            You have <span className="font-semibold">{Number(localCredits ?? credits ?? 0)}</span> credits left.
+            Add more to analyze additional emails.
           </p>
         </div>
         <div className="flex gap-3">
           <Button onClick={() => navigate("/billing")} className="bg-white text-indigo-700 hover:bg-gray-100">
-            Booster maintenant
+            Add credits
           </Button>
           <Button
             variant="outline"
@@ -503,5 +503,6 @@ return (
     </main>
   </div>
 );
+
 
 }
