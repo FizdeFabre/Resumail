@@ -146,28 +146,41 @@ export default function Dashboard() {
         if (mounted) {
           setHistory(normalized);
 
-          if (!statsObj) {
-            const totalEmails = normalized.reduce((s, x) => s + (Number(x.total_emails) || 0), 0);
-            const avg = { positive: 0, neutral: 0, negative: 0, other: 0 };
-            normalized.forEach((x) => {
-              const snts = x.sentiment_overall || {};
-              avg.positive += Number(snts.positive || 0);
-              avg.neutral += Number(snts.neutral || 0);
-              avg.negative += Number(snts.negative || 0);
-              avg.other += Number(snts.other || 0);
-            });
-            const count = normalized.length || 1;
-            avg.positive = Math.round(avg.positive / count);
-            avg.neutral = Math.round(avg.neutral / count);
-            avg.negative = Math.round(avg.negative / count);
-            avg.other = Math.round(avg.other / count);
+     if (!statsObj) {
+  const finals = normalized.filter((x) => x.is_final && x.sentiment_overall);
+  const sentimentTotals = finals.reduce(
+    (acc, r) => {
+      const snts = r.sentiment_overall || {};
+      acc.positive += snts.positive || 0;
+      acc.neutral += snts.neutral || 0;
+      acc.negative += snts.negative || 0;
+      acc.other += snts.other || 0;
+      return acc;
+    },
+    { positive: 0, neutral: 0, negative: 0, other: 0 }
+  );
 
-            statsObj = {
-              total_emails: totalEmails,
-              avg,
-              last_summary: normalized[0]?.report_text ?? "",
-            };
-          }
+  const totalSum =
+    sentimentTotals.positive +
+    sentimentTotals.neutral +
+    sentimentTotals.negative +
+    sentimentTotals.other;
+
+  const avg = totalSum
+    ? {
+        positive: Math.round((sentimentTotals.positive / totalSum) * 100),
+        neutral: Math.round((sentimentTotals.neutral / totalSum) * 100),
+        negative: Math.round((sentimentTotals.negative / totalSum) * 100),
+        other: Math.round((sentimentTotals.other / totalSum) * 100),
+      }
+    : { positive: 0, neutral: 0, negative: 0, other: 0 };
+
+  statsObj = {
+    total_emails: finals.reduce((s, x) => s + (Number(x.total_emails) || 0), 0),
+    avg,
+    last_summary: finals[0]?.report_text ?? "",
+  };
+}
 
           setStats({
             total_emails: statsObj.total_emails ?? 0,
@@ -226,7 +239,8 @@ const downloadReportPdf = async (report) => {
   }
 };
 
-  // small derived data for charts
+  // small derived data for chart
+  
   const pieData = [
     { name: "Positive", value: stats?.avg?.positive ?? 0 },
     { name: "Neutral", value: stats?.avg?.neutral ?? 0 },

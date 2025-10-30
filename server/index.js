@@ -510,7 +510,7 @@ function safeParseJson(str, fallbackTotal = 0) {
     if (!parsed.highlights) parsed.highlights = [];
     if (!parsed.summary) parsed.summary = "";
 
-    // ✅ ICI : avant le return
+    // ✅ fix: on ajoute le sentiment global ici, avant le return
     parsed.sentiment_overall = parsed.classification;
 
     return parsed;
@@ -518,7 +518,7 @@ function safeParseJson(str, fallbackTotal = 0) {
     return {
       total_emails: fallbackTotal,
       classification: { positive: 0, negative: 0, neutral: 0, other: 0 },
-      sentiment_overall: { positive: 0, negative: 0, neutral: 0, other: 0 }, // 👈 ajouté aussi ici
+      sentiment_overall: { positive: 0, negative: 0, neutral: 0, other: 0 }, // ✅ ajouté ici aussi
       highlights: [],
       summary: str.slice(0, 1000),
     };
