@@ -262,6 +262,8 @@ if (!user)
     </div>
   );
 
+    console.log("📊 Stats data:", stats);
+
 return (
   <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500">
     {/* Header */}

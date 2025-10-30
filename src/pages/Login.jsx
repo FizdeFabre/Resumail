@@ -35,7 +35,6 @@ export default function Login() {
     setLoading(false);
   }
 
-  console.log("📊 Stats data:", stats);
 
 return (
   <div className="min-h-screen bg-indigo-700 flex items-center justify-center px-6">
