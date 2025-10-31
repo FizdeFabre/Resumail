@@ -505,26 +505,31 @@ function safeParseJson(str, fallbackTotal = 0) {
     if (!m) throw new Error("No JSON found");
     const parsed = JSON.parse(m[0]);
 
-    if (!parsed.total_emails) parsed.total_emails = fallbackTotal;
-    if (!parsed.classification) parsed.classification = { positive: 0, negative: 0, neutral: 0, other: 0 };
-    if (!parsed.highlights) parsed.highlights = [];
-    if (!parsed.summary) parsed.summary = "";
-
-    // ✅ fix: on ajoute le sentiment global ici, avant le return
-    parsed.sentiment_overall = parsed.classification;
+    // Normalisation robuste
+    parsed.total_emails = Number(parsed.total_emails || fallbackTotal || 0);
+    const cls = parsed.classification || {};
+    parsed.classification = {
+      positive: Number(cls.positive || 0),
+      negative: Number(cls.negative || 0),
+      neutral:  Number(cls.neutral  || 0),
+      other:    Number(cls.other    || 0),
+    };
+    parsed.sentiment_overall = parsed.classification; // <- ICI, avant le return
+    parsed.highlights = Array.isArray(parsed.highlights) ? parsed.highlights : [];
+    parsed.summary = typeof parsed.summary === "string" ? parsed.summary : "";
 
     return parsed;
   } catch {
-    return {
-      total_emails: fallbackTotal,
-      classification: { positive: 0, negative: 0, neutral: 0, other: 0 },
-      sentiment_overall: { positive: 0, negative: 0, neutral: 0, other: 0 }, // ✅ ajouté ici aussi
+    const fallback = {
+      total_emails: Number(fallbackTotal || 0),
+      classification: { positive:0, negative:0, neutral:0, other:0 },
+      sentiment_overall: { positive:0, negative:0, neutral:0, other:0 },
       highlights: [],
-      summary: str.slice(0, 1000),
+      summary: (str || "").slice(0, 1000),
     };
+    return fallback;
   }
 }
-
 
 app.post("/analyzev2", async (req, res) => {
   try {
@@ -535,7 +540,6 @@ app.post("/analyzev2", async (req, res) => {
       return res.status(500).json({ error: "Supabase not configured" });
 
     const BATCH_SIZE = 50;
-    const MERGE_BATCH_SIZE = 5;
     const CREDITS_PER_EMAIL = Number(process.env.CREDITS_PER_EMAIL || "1");
     const neededCredits = emails.length * CREDITS_PER_EMAIL;
 
@@ -552,7 +556,6 @@ app.post("/analyzev2", async (req, res) => {
           ? rpcData
           : rpcData?.[0]?.credits ?? null;
     } catch {
-      // fallback manuel
       const { data: profile, error: selErr } = await supabase
         .from("profiles")
         .select("credits")
@@ -571,7 +574,7 @@ app.post("/analyzev2", async (req, res) => {
       newBalance = updated.credits;
     }
 
-    // --- 2) Découpage des emails ---
+    // --- 2) Split des emails ---
     const chunkArray = (arr, size) => {
       const out = [];
       for (let i = 0; i < arr.length; i += size)
@@ -589,9 +592,7 @@ app.post("/analyzev2", async (req, res) => {
       const text = batch
         .map(
           (e, idx) =>
-            `Email ${idx + 1} (from: ${e.from}, subject: ${e.subject}): ${
-              e.body || ""
-            }`
+            `Email ${idx + 1} (from: ${e.from}, subject: ${e.subject}): ${e.body || ""}`
         )
         .join("\n\n");
 
@@ -603,10 +604,7 @@ app.post("/analyzev2", async (req, res) => {
   "summary": "max 5 sentences"
 }`;
 
-      const userPrompt = `Analyze the following ${batch.length} emails:\n\n${text.slice(
-        0,
-        15000
-      )}`;
+      const userPrompt = `Analyze the following ${batch.length} emails:\n\n${text.slice(0, 15000)}`;
 
       let aiRaw = "";
       try {
@@ -647,60 +645,59 @@ app.post("/analyzev2", async (req, res) => {
       if (!miniErr && insertedMini) {
         miniReportIds.push(insertedMini.id);
         partialJsons.push(parsed);
-        console.log(`✅ Mini-rapport créé : ${insertedMini.id}`);
+        console.log(`✅ Mini-report created: ${insertedMini.id}`);
       } else {
         console.error("Insert mini report error:", miniErr);
       }
     }
 
-    // --- 4) Fusion des rapports ---
-    async function mergeReports(jsonList) {
-      if (jsonList.length === 1) return jsonList[0];
-      const groups = chunkArray(jsonList, MERGE_BATCH_SIZE);
-      const merged = [];
-
-      for (const group of groups) {
-        const mergePrompt = `
-You are an assistant that MUST merge multiple JSON reports into one final JSON.
-Format:
-{
-  "total_emails": integer,
-  "classification": {"positive": integer,"negative": integer,"neutral": integer,"other": integer},
-  "highlights": [{"text": "string","count": integer,"pct": "xx%"}, ...],
-  "summary": "max 8 sentences"
-}`;
-        const mergeInput = group
-          .map((p, i) => `REPORT ${i + 1}:\n${JSON.stringify(p)}`)
-          .join("\n\n");
-
-        try {
-          const merge = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-              { role: "system", content: mergePrompt },
-              { role: "user", content: mergeInput },
-            ],
-            temperature: 0.2,
-            max_tokens: 1000,
-          });
-          const mergedJson = safeParseJson(
-            merge.choices?.[0]?.message?.content || "",
-            0
-          );
-          merged.push(mergedJson);
-        } catch (err) {
-          console.error("Merge failed:", err);
-          merged.push(group[0]);
-        }
+    // --- 4) Fusion déterministe (plus d'IA ici) ---
+    const agg = partialJsons.reduce(
+      (acc, p) => {
+        acc.total_emails += Number(p.total_emails || 0);
+        acc.classification.positive += Number(p.classification?.positive || 0);
+        acc.classification.neutral += Number(p.classification?.neutral || 0);
+        acc.classification.negative += Number(p.classification?.negative || 0);
+        acc.classification.other += Number(p.classification?.other || 0);
+        if (Array.isArray(p.highlights))
+          acc.highlights.push(...p.highlights.slice(0, 3));
+        acc.summaryParts.push(p.summary || "");
+        return acc;
+      },
+      {
+        total_emails: 0,
+        classification: { positive: 0, neutral: 0, negative: 0, other: 0 },
+        highlights: [],
+        summaryParts: [],
       }
+    );
 
-      if (merged.length > 1) return mergeReports(merged);
-      return merged[0];
+    // --- 5) Résumé final (IA, juste le texte) ---
+    let finalSummary = "";
+    try {
+      const mergeSummary = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "Write a concise 6-8 sentence summary of these email analyses." },
+          { role: "user", content: agg.summaryParts.join("\n\n").slice(0, 15000) },
+        ],
+        temperature: 0.3,
+        max_tokens: 500,
+      });
+      finalSummary = mergeSummary.choices?.[0]?.message?.content?.trim() || "";
+    } catch (err) {
+      console.error("AI summary merge failed:", err);
     }
 
-    const finalJson = await mergeReports(partialJsons);
+    const finalJson = {
+      total_emails: agg.total_emails,
+      classification: agg.classification,
+      sentiment_overall: agg.classification,
+      highlights: agg.highlights,
+      summary: finalSummary,
+    };
 
-    // --- 5) Sauvegarde du rapport final ---
+    // --- 6) Sauvegarde du rapport final ---
     const { data: insertedFinal, error: finalErr } = await supabase
       .from("reports")
       .insert([
@@ -712,7 +709,7 @@ Format:
           classification: finalJson.classification,
           highlights: finalJson.highlights,
           sentiment_overall: finalJson.classification,
-          mini_report_ids: miniReportIds, // JSON array propre
+          mini_report_ids: miniReportIds,
           is_final: true,
         },
       ])
@@ -724,7 +721,7 @@ Format:
       return res.status(500).json({ error: "Failed to save final report" });
     }
 
-    console.log(`🏁 Rapport final créé : ${insertedFinal.id}`);
+    console.log(`🏁 Final report created: ${insertedFinal.id}`);
 
     const { data: profileAfter } = await supabase
       .from("profiles")
@@ -746,6 +743,7 @@ Format:
     return res.status(500).json({ error: "IA analysis failed", detail: err.message });
   }
 });
+
 
 // Optional: delete stored tokens for a user (logout)
 app.delete("/tokens", (req, res) => { 

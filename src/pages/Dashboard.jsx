@@ -346,96 +346,91 @@ return (
                 >
                   Connect Gmail
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/filters")}
-                  className="bg-white/10 hover:bg-white/20 text-white border-white/30"
-                >
-                  Go to Filters
-                </Button>
+             
               </div>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Stats & Charts */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"
-      >
-        {/* Total emails */}
-        <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
-          <div className="p-6">
-            <h3 className="text-gray-900 font-semibold">Total Emails Analyzed</h3>
-            <div className="text-4xl font-extrabold text-indigo-700 mt-2">
-              {stats?.total_emails ?? 0}
-            </div>
-            <p className="text-gray-500 text-sm mt-4">Last summary:</p>
-            <p className="text-gray-800 text-sm mt-1 line-clamp-4 break-words">
-              {stats?.last_summary ?? "—"}
-            </p>
-          </div>
+{/* === STATS & CHARTS — TEMPORARILY DISABLED === */}
+{false && (
+  <motion.div
+    initial={{ opacity: 0, y: 8 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.25 }}
+    className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"
+  >
+    {/* Total emails */}
+    <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+      <div className="p-6">
+        <h3 className="text-gray-900 font-semibold">Total Emails Analyzed</h3>
+        <div className="text-4xl font-extrabold text-indigo-700 mt-2">
+          {stats?.total_emails ?? 0}
         </div>
-
-        {/* Pie Chart */}
-      <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
-  <div className="p-6">
-    <h3 className="text-gray-900 font-semibold">Sentiment Distribution</h3>
-    {pieData.every(d => d.value === 0) ? (
-      <p className="text-gray-500 text-sm mt-3 italic">
-        No sentiment data available yet.
-      </p>
-    ) : (
-      <div style={{ height: 220 }} className="mt-3">
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie
-              data={pieData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              innerRadius={48}
-              outerRadius={82}
-              paddingAngle={4}
-            >
-              {pieData.map((entry, idx) => (
-                <Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip formatter={(v) => `${v}`} />
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
-        </ResponsiveContainer>
+        <p className="text-gray-500 text-sm mt-4">Last summary:</p>
+        <p className="text-gray-800 text-sm mt-1 line-clamp-4 break-words">
+          {stats?.last_summary ?? "—"}
+        </p>
       </div>
-    )}
-  </div>
-</div>
+    </div>
 
-
-        {/* Line Chart */}
-        <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
-          <div className="p-6">
-            <h3 className="text-gray-900 font-semibold">Trend — Processed Emails</h3>
-            <div style={{ height: 220 }} className="mt-3">
-              <ResponsiveContainer>
-                <LineChart data={lineData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="emails" stroke="#7C3AED" strokeWidth={2} dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+    {/* Pie Chart */}
+    <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+      <div className="p-6">
+        <h3 className="text-gray-900 font-semibold">Sentiment Distribution</h3>
+        {pieData.every(d => d.value === 0) ? (
+          <p className="text-gray-500 text-sm mt-3 italic">
+            No sentiment data available yet.
+          </p>
+        ) : (
+          <div style={{ height: 220 }} className="mt-3">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={48}
+                  outerRadius={82}
+                  paddingAngle={4}
+                >
+                  {pieData.map((entry, idx) => (
+                    <Cell key={`cell-${idx}`} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v) => `${v}`} />
+                <Legend verticalAlign="bottom" height={36} />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
-        </div>
-      </motion.div>
+        )}
+      </div>
+    </div>
 
+    {/* Line Chart */}
+    <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
+      <div className="p-6">
+        <h3 className="text-gray-900 font-semibold">Trend — Processed Emails</h3>
+        <div style={{ height: 220 }} className="mt-3">
+          <ResponsiveContainer>
+            <LineChart data={lineData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="emails" stroke="#7C3AED" strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+)}
+   
       {/* Reports history */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <div className="rounded-2xl bg-white/90 backdrop-blur border border-white/60 shadow-md">
