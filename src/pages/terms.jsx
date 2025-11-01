@@ -58,11 +58,10 @@ export default function Terms() {
             <p>
               For any inquiries or legal questions, please contact us at:{" "}
               <a
-                href="mailto:resumail.saas@gmail.com"
+                href="mailto:pinkfillysaas@gmail.com"
                 className="text-indigo-600 hover:underline font-medium"
               >
-               resumail.saas@gmail.com
-
+                pinkfillysaas@gmail.com
               </a>
             </p>
           </section>
